@@ -17,13 +17,18 @@ export const getAllFeatures = async (req: Request, res: Response) => {
 export const getFeatureById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid feature ID' });
+    }
+
     const featureRepo = AppDataSource.getRepository(PropertyFeature);
     const feature = await featureRepo.findOne({ where: { id } });
-    
+
     if (!feature) {
       return res.status(404).json({ success: false, message: 'Feature not found' });
     }
-    
+
     res.json({ success: true, data: feature });
   } catch (error) {
     console.error('Error fetching feature:', error);
@@ -63,20 +68,25 @@ export const createFeature = async (req: Request, res: Response) => {
 export const updateFeature = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid feature ID' });
+    }
+
     const { name, slug } = req.body;
-    
+
     const featureRepo = AppDataSource.getRepository(PropertyFeature);
     const feature = await featureRepo.findOne({ where: { id } });
-    
+
     if (!feature) {
       return res.status(404).json({ success: false, message: 'Feature not found' });
     }
-    
+
     if (name) feature.name = name;
     if (slug) feature.slug = slug;
-    
+
     await featureRepo.save(feature);
-    
+
     res.json({ success: true, data: feature });
   } catch (error) {
     console.error('Error updating feature:', error);
@@ -87,15 +97,20 @@ export const updateFeature = async (req: Request, res: Response) => {
 export const deleteFeature = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid feature ID' });
+    }
+
     const featureRepo = AppDataSource.getRepository(PropertyFeature);
     const feature = await featureRepo.findOne({ where: { id } });
-    
+
     if (!feature) {
       return res.status(404).json({ success: false, message: 'Feature not found' });
     }
-    
+
     await featureRepo.remove(feature);
-    
+
     res.json({ success: true, message: 'Feature deleted successfully' });
   } catch (error) {
     console.error('Error deleting feature:', error);

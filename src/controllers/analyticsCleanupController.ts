@@ -30,33 +30,37 @@ export const cleanupAnalyticsData = async (req: Request, res: Response) => {
     const clickEventRepo = AppDataSource.getRepository(ClickEvent);
 
     // Delete old data
-    const [pageViewsDeleted] = await pageViewRepo
+    const pageViewsResult = await pageViewRepo
       .createQueryBuilder()
       .delete()
       .where('createdAt < :cutoffDate', { cutoffDate })
       .execute();
 
-    const [propertyViewsDeleted] = await propertyViewRepo
+    const propertyViewsResult = await propertyViewRepo
       .createQueryBuilder()
       .delete()
       .where('createdAt < :cutoffDate', { cutoffDate })
       .execute();
 
-    const [clickEventsDeleted] = await clickEventRepo
+    const clickEventsResult = await clickEventRepo
       .createQueryBuilder()
       .delete()
       .where('createdAt < :cutoffDate', { cutoffDate })
       .execute();
 
-    res.json({ 
-      success: true, 
+    const pageViewsDeleted = pageViewsResult.affected || 0;
+    const propertyViewsDeleted = propertyViewsResult.affected || 0;
+    const clickEventsDeleted = clickEventsResult.affected || 0;
+
+    res.json({
+      success: true,
       message: `Successfully cleaned up analytics data older than ${retentionDays} days.`,
       retentionDays,
       cutoffDate,
       deletedCounts: {
-        pageViews: pageViewsDeleted || 0,
-        propertyViews: propertyViewsDeleted || 0,
-        clickEvents: clickEventsDeleted || 0,
+        pageViews: pageViewsDeleted,
+        propertyViews: propertyViewsDeleted,
+        clickEvents: clickEventsDeleted,
       },
     });
   } catch (error) {

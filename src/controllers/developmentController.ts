@@ -17,13 +17,18 @@ export const getAllDevelopments = async (req: Request, res: Response) => {
 export const getDevelopmentById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid development ID' });
+    }
+
     const developmentRepo = AppDataSource.getRepository(Development);
     const development = await developmentRepo.findOne({ where: { id } });
-    
+
     if (!development) {
       return res.status(404).json({ success: false, message: 'Development not found' });
     }
-    
+
     res.json({ success: true, data: development });
   } catch (error) {
     console.error('Error fetching development:', error);
@@ -73,15 +78,20 @@ export const createDevelopment = async (req: Request, res: Response) => {
 export const updateDevelopment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid development ID' });
+    }
+
     const { name, slug, description, location, developerName, status, completionDate, imageUrl } = req.body;
-    
+
     const developmentRepo = AppDataSource.getRepository(Development);
     const development = await developmentRepo.findOne({ where: { id } });
-    
+
     if (!development) {
       return res.status(404).json({ success: false, message: 'Development not found' });
     }
-    
+
     if (name) development.name = name;
     if (slug) development.slug = slug;
     if (description !== undefined) development.description = description;
@@ -90,9 +100,9 @@ export const updateDevelopment = async (req: Request, res: Response) => {
     if (status !== undefined) development.status = status;
     if (completionDate !== undefined) development.completionDate = completionDate ? new Date(completionDate) : undefined;
     if (imageUrl !== undefined) development.imageUrl = imageUrl;
-    
+
     await developmentRepo.save(development);
-    
+
     res.json({ success: true, data: development });
   } catch (error) {
     console.error('Error updating development:', error);
@@ -103,15 +113,20 @@ export const updateDevelopment = async (req: Request, res: Response) => {
 export const deleteDevelopment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid development ID' });
+    }
+
     const developmentRepo = AppDataSource.getRepository(Development);
     const development = await developmentRepo.findOne({ where: { id } });
-    
+
     if (!development) {
       return res.status(404).json({ success: false, message: 'Development not found' });
     }
-    
+
     await developmentRepo.remove(development);
-    
+
     res.json({ success: true, message: 'Development deleted successfully' });
   } catch (error) {
     console.error('Error deleting development:', error);
