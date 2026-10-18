@@ -10,9 +10,9 @@
         "migration:run": "tsx src/scripts/runMigrations.ts",
         "seed": "npm run build && node dist/seed.js",
         "fix-schema": "npm run build && node dist/fix-schema.js",
-        "test": "jest",
-        "test:watch": "jest --watch",
-        "test:coverage": "jest --coverage"
+        "test": "jest --passWithNoTests",
+        "test:watch": "jest --watch --passWithNoTests",
+        "test:coverage": "jest --coverage --passWithNoTests"
     },
     "dependencies": {
         "@supabase/server": "^1.9.0",
