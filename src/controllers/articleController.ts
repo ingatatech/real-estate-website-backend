@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { randomUUID } from 'node:crypto';
 import { AppDataSource } from '../lib/typeorm.js';
 import { Article } from '../entities/Article.js';
 import { ArticleCategory } from '../entities/ArticleCategory.js';
@@ -71,7 +72,30 @@ export const getArticleById = async (req: Request, res: Response, next: (error: 
 export const createArticle = async (req: Request, res: Response, next: (error: unknown) => void) => {
   try {
     const articleRepo = AppDataSource.getRepository(Article);
-    const article = articleRepo.create(req.body);
+    const categoryRepo = AppDataSource.getRepository(ArticleCategory);
+    const { title, slug, excerpt, content, featuredImage, categoryId, authorId, publicationStatus = 'DRAFT' } = req.body;
+
+    if (!title || !slug || !content) {
+      return res.status(400).json({ success: false, message: 'Title, slug, and content are required' });
+    }
+
+    if (categoryId) {
+      const category = await categoryRepo.findOne({ where: { id: String(categoryId), isActive: true } });
+      if (!category) return res.status(400).json({ success: false, message: 'The selected article category is unavailable' });
+    }
+
+    const article = articleRepo.create({
+      id: randomUUID(),
+      title,
+      slug,
+      excerpt: excerpt || undefined,
+      content,
+      featuredImage: featuredImage || undefined,
+      categoryId: categoryId || undefined,
+      authorId: authorId || undefined,
+      publicationStatus,
+      publishedAt: publicationStatus === 'PUBLISHED' ? new Date() : undefined,
+    });
     const savedArticle = await articleRepo.save(article);
     res.status(201).json({ success: true, data: savedArticle });
   } catch (error) { next(error); }
