@@ -19,42 +19,47 @@ const getClientIp = (req: Request): string | undefined => {
 const getUserAgentInfo = (req: Request) => {
   const userAgent = req.headers['user-agent'] || '';
   
-  // Simple device type detection
-  const isMobile = /Mobile|Android|iPhone|iPad/i.test(userAgent);
-  const deviceType = isMobile ? 'mobile' : 'desktop';
+  // Enhanced device type detection
+  let deviceType = 'desktop';
+  if (/Mobile|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+    deviceType = 'mobile';
+  } else if (/Tablet|iPad/i.test(userAgent)) {
+    deviceType = 'tablet';
+  }
   
-  // Simple browser detection
+  // Enhanced browser detection
   let browser = 'unknown';
-  if (userAgent.includes('Chrome')) browser = 'chrome';
-  else if (userAgent.includes('Firefox')) browser = 'firefox';
-  else if (userAgent.includes('Safari')) browser = 'safari';
-  else if (userAgent.includes('Edge')) browser = 'edge';
+  if (/Edg/i.test(userAgent)) browser = 'edge';
+  else if (/Chrome/i.test(userAgent) && !/Edg/i.test(userAgent)) browser = 'chrome';
+  else if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) browser = 'safari';
+  else if (/Firefox/i.test(userAgent)) browser = 'firefox';
+  else if (/Opera/i.test(userAgent)) browser = 'opera';
   
-  // Simple OS detection
+  // Enhanced OS detection
   let os = 'unknown';
-  if (userAgent.includes('Windows')) os = 'windows';
-  else if (userAgent.includes('Mac')) os = 'macos';
-  else if (userAgent.includes('Linux')) os = 'linux';
-  else if (userAgent.includes('Android')) os = 'android';
-  else if (userAgent.includes('iOS')) os = 'ios';
+  if (/Windows/i.test(userAgent)) os = 'windows';
+  else if (/Mac OS X|Macintosh/i.test(userAgent)) os = 'macos';
+  else if (/Linux/i.test(userAgent)) os = 'linux';
+  else if (/Android/i.test(userAgent)) os = 'android';
+  else if (/iOS|iPhone|iPad|iPod/i.test(userAgent)) os = 'ios';
   
   return { deviceType, browser, os };
 };
 
 // Parse UTM parameters from query string
-const parseUtmParams = (query: any) => ({
-  utmSource: query.utm_source || undefined,
-  utmMedium: query.utm_medium || undefined,
-  utmCampaign: query.utm_campaign || undefined,
-  utmTerm: query.utm_term || undefined,
-  utmContent: query.utm_content || undefined,
+const parseUtmParams = (input: any) => ({
+  utmSource: input.utmSource || input.utm_source || undefined,
+  utmMedium: input.utmMedium || input.utm_medium || undefined,
+  utmCampaign: input.utmCampaign || input.utm_campaign || undefined,
+  utmTerm: input.utmTerm || input.utm_term || undefined,
+  utmContent: input.utmContent || input.utm_content || undefined,
 });
 
 export const trackPageView = async (req: Request, res: Response) => {
   try {
     const pageViewRepo = AppDataSource.getRepository(PageView);
     const { deviceType, browser, os } = getUserAgentInfo(req);
-    const utmParams = parseUtmParams(req.query);
+    const utmParams = parseUtmParams({ ...req.query, ...req.body });
     
     const pageView = pageViewRepo.create({
       id: randomUUID(),
@@ -86,12 +91,16 @@ export const trackPropertyView = async (req: Request, res: Response) => {
   try {
     const propertyViewRepo = AppDataSource.getRepository(PropertyView);
     const { deviceType } = getUserAgentInfo(req);
+    const propertyId = req.body.propertyId || req.params.propertyId;
+    if (!propertyId || typeof propertyId !== 'string') {
+      return res.status(400).json({ success: false, message: 'A property ID is required.' });
+    }
     
     const propertyView = propertyViewRepo.create({
       id: randomUUID(),
       userId: (req as any).user?.id || undefined,
       sessionId: req.headers['x-session-id'] as string || undefined,
-      propertyId: req.body.propertyId || req.params.propertyId,
+      propertyId,
       sessionDurationSeconds: req.body.sessionDurationSeconds || undefined,
       referrer: req.headers.referer || req.body.referrer || undefined,
       deviceType,
@@ -111,12 +120,17 @@ export const trackClickEvent = async (req: Request, res: Response) => {
   try {
     const clickEventRepo = AppDataSource.getRepository(ClickEvent);
     const { deviceType } = getUserAgentInfo(req);
+    const eventType = req.body.eventType;
+    const eventTypes = new Set(['CTA', 'PHONE', 'EMAIL', 'WHATSAPP', 'LINK', 'BUTTON', 'SEARCH', 'FILTER']);
+    if (!eventTypes.has(eventType) || typeof req.body.pagePath !== 'string') {
+      return res.status(400).json({ success: false, message: 'A valid event type and page path are required.' });
+    }
     
     const clickEvent = clickEventRepo.create({
       id: randomUUID(),
       userId: (req as any).user?.id || undefined,
       sessionId: req.headers['x-session-id'] as string || undefined,
-      eventType: req.body.eventType,
+      eventType,
       propertyId: req.body.propertyId || undefined,
       elementId: req.body.elementId || undefined,
       elementText: req.body.elementText || undefined,

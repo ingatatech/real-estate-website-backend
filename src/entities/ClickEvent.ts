@@ -10,7 +10,7 @@ import {
 import { User } from './User.js';
 import { Property } from './Property.js';
 
-export type ClickEventType = 'CTA' | 'PHONE' | 'EMAIL' | 'WHATSAPP' | 'LINK' | 'BUTTON';
+export type ClickEventType = 'CTA' | 'PHONE' | 'EMAIL' | 'WHATSAPP' | 'LINK' | 'BUTTON' | 'SEARCH' | 'FILTER';
 
 @Entity('click_events')
 @Index(['userId'])
