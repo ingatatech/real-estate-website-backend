@@ -9,6 +9,7 @@
         "start": "node dist/server.js",
         "migration:run": "tsx src/scripts/runMigrations.ts",
         "seed": "npm run build && node dist/seed.js",
+        "seed:article-categories": "tsx src/scripts/seedArticleCategories.ts",
         "fix-schema": "npm run build && node dist/fix-schema.js",
         "test": "jest --passWithNoTests",
         "test:watch": "jest --watch --passWithNoTests",
