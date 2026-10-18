@@ -168,10 +168,38 @@ export const replaceArticle = async (req: Request, res: Response, next: (error: 
     const articleRepo = AppDataSource.getRepository(Article);
     const article = await articleRepo.findOne({ where: { id: String(req.params.id) } });
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
-    Object.assign(article, req.body);
+    
+    // Manually update scalar fields to avoid TypeORM relation loading issues
+    const { title, slug, excerpt, content, featuredImage, categoryId, authorId, publicationStatus } = req.body;
+    
+    // Check for duplicate slug if slug is being changed
+    if (slug !== undefined && slug !== article.slug) {
+      const existingArticle = await articleRepo.findOne({ where: { slug } });
+      if (existingArticle) {
+        return res.status(409).json({ success: false, message: 'An article with this slug already exists' });
+      }
+    }
+    
+    if (title !== undefined) article.title = title;
+    if (slug !== undefined) article.slug = slug;
+    if (excerpt !== undefined) article.excerpt = excerpt || undefined;
+    if (content !== undefined) article.content = content;
+    if (featuredImage !== undefined) article.featuredImage = featuredImage || undefined;
+    if (categoryId !== undefined) article.categoryId = categoryId || undefined;
+    if (authorId !== undefined) article.authorId = authorId || undefined;
+    if (publicationStatus !== undefined) article.publicationStatus = publicationStatus;
+    
+    // Update publishedAt if status changes to PUBLISHED
+    if (publicationStatus === 'PUBLISHED' && article.publicationStatus !== 'PUBLISHED') {
+      article.publishedAt = new Date();
+    }
+    
     const updatedArticle = await articleRepo.save(article);
     res.json({ success: true, data: updatedArticle });
-  } catch (error) { next(error); }
+  } catch (error) {
+    console.error('Error replacing article:', error);
+    next(error);
+  }
 };
 
 export const updateArticle = async (req: Request, res: Response, next: (error: unknown) => void) => {
@@ -180,11 +208,37 @@ export const updateArticle = async (req: Request, res: Response, next: (error: u
     const article = await articleRepo.findOne({ where: { id: String(req.params.id) } });
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
     
-    // Update fields, allowing categoryId without validation
-    Object.assign(article, req.body);
+    // Manually update scalar fields to avoid TypeORM relation loading issues
+    const { title, slug, excerpt, content, featuredImage, categoryId, authorId, publicationStatus } = req.body;
+    
+    // Check for duplicate slug if slug is being changed
+    if (slug !== undefined && slug !== article.slug) {
+      const existingArticle = await articleRepo.findOne({ where: { slug } });
+      if (existingArticle) {
+        return res.status(409).json({ success: false, message: 'An article with this slug already exists' });
+      }
+    }
+    
+    if (title !== undefined) article.title = title;
+    if (slug !== undefined) article.slug = slug;
+    if (excerpt !== undefined) article.excerpt = excerpt || undefined;
+    if (content !== undefined) article.content = content;
+    if (featuredImage !== undefined) article.featuredImage = featuredImage || undefined;
+    if (categoryId !== undefined) article.categoryId = categoryId || undefined;
+    if (authorId !== undefined) article.authorId = authorId || undefined;
+    if (publicationStatus !== undefined) article.publicationStatus = publicationStatus;
+    
+    // Update publishedAt if status changes to PUBLISHED
+    if (publicationStatus === 'PUBLISHED' && article.publicationStatus !== 'PUBLISHED') {
+      article.publishedAt = new Date();
+    }
+    
     const updatedArticle = await articleRepo.save(article);
     res.json({ success: true, data: updatedArticle });
-  } catch (error) { next(error); }
+  } catch (error) {
+    console.error('Error updating article:', error);
+    next(error);
+  }
 };
 
 export const deleteArticle = async (req: Request, res: Response, next: (error: unknown) => void) => {
