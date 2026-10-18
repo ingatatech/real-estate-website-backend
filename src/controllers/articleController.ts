@@ -4,20 +4,6 @@ import { AppDataSource } from '../lib/typeorm.js';
 import { Article } from '../entities/Article.js';
 import { ArticleCategory } from '../entities/ArticleCategory.js';
 
-// Hardcoded categories matching frontend
-const HARDCODED_CATEGORIES: Record<string, { name: string; slug: string }> = {
-  '1': { name: 'Property Market Updates', slug: 'property-market-updates' },
-  '2': { name: 'Buying Guides', slug: 'buying-guides' },
-  '3': { name: 'Renting Guides', slug: 'renting-guides' },
-  '4': { name: 'Selling Guides', slug: 'selling-guides' },
-  '5': { name: 'Property Investment', slug: 'property-investment' },
-  '6': { name: 'Property Management', slug: 'property-management' },
-  '7': { name: 'Homeownership', slug: 'homeownership' },
-  '8': { name: 'Real Estate Trends', slug: 'real-estate-trends' },
-  '9': { name: 'Company Announcements', slug: 'company-announcements' },
-  '10': { name: 'New Developments', slug: 'new-developments' },
-};
-
 export const getArticles = async (req: Request, res: Response, next: (error: unknown) => void) => {
   try {
     const articleRepo = AppDataSource.getRepository(Article);
@@ -29,19 +15,9 @@ export const getArticles = async (req: Request, res: Response, next: (error: unk
       .orderBy('article.publishedAt', 'DESC');
 
     if (typeof req.query.category === 'string') {
-      const categorySlug = req.query.category;
-      // Find category by slug in database or in hardcoded categories
-      const category = await categoryRepo.findOne({ where: { slug: categorySlug } });
+      const category = await categoryRepo.findOne({ where: { slug: req.query.category } });
       if (category) {
         qb.andWhere('article.categoryId = :categoryId', { categoryId: category.id });
-      } else {
-        // Check if it's a hardcoded category slug
-        const hardcodedCategoryId = Object.entries(HARDCODED_CATEGORIES).find(
-          ([, cat]) => cat.slug === categorySlug
-        )?.[0];
-        if (hardcodedCategoryId) {
-          qb.andWhere('article.categoryId = :categoryId', { categoryId: hardcodedCategoryId });
-        }
       }
     }
 
@@ -56,22 +32,9 @@ export const getArticles = async (req: Request, res: Response, next: (error: unk
 
     const [articles, total] = await qb.getManyAndCount();
 
-    // Populate category data from hardcoded categories if not in database
-    const articlesWithCategories = articles.map(article => {
-      if (!article.category && article.categoryId && HARDCODED_CATEGORIES[article.categoryId]) {
-        article.category = {
-          id: article.categoryId,
-          name: HARDCODED_CATEGORIES[article.categoryId].name,
-          slug: HARDCODED_CATEGORIES[article.categoryId].slug,
-          isActive: true,
-        } as any;
-      }
-      return article;
-    });
-
     res.json({
       success: true,
-      data: articlesWithCategories,
+      data: articles,
       pagination: {
         page,
         limit,
@@ -93,17 +56,6 @@ export const getArticleBySlug = async (req: Request, res: Response, next: (error
       relations: { category: true, author: true },
     });
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
-    
-    // If category exists in database, use it; otherwise use hardcoded category
-    if (!article.category && article.categoryId && HARDCODED_CATEGORIES[article.categoryId]) {
-      article.category = {
-        id: article.categoryId,
-        name: HARDCODED_CATEGORIES[article.categoryId].name,
-        slug: HARDCODED_CATEGORIES[article.categoryId].slug,
-        isActive: true,
-      } as any;
-    }
-    
     return res.json({ success: true, data: article });
   } catch (error) { return next(error); }
 };
@@ -116,17 +68,6 @@ export const getArticleById = async (req: Request, res: Response, next: (error: 
       relations: { category: true, author: true },
     });
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
-    
-    // If category exists in database, use it; otherwise use hardcoded category
-    if (!article.category && article.categoryId && HARDCODED_CATEGORIES[article.categoryId]) {
-      article.category = {
-        id: article.categoryId,
-        name: HARDCODED_CATEGORIES[article.categoryId].name,
-        slug: HARDCODED_CATEGORIES[article.categoryId].slug,
-        isActive: true,
-      } as any;
-    }
-    
     return res.json({ success: true, data: article });
   } catch (error) { return next(error); }
 };
@@ -134,10 +75,19 @@ export const getArticleById = async (req: Request, res: Response, next: (error: 
 export const createArticle = async (req: Request, res: Response, next: (error: unknown) => void) => {
   try {
     const articleRepo = AppDataSource.getRepository(Article);
+    const categoryRepo = AppDataSource.getRepository(ArticleCategory);
     const { title, slug, excerpt, content, featuredImage, categoryId, authorId, publicationStatus = 'DRAFT' } = req.body;
 
     if (!title || !slug || !content) {
       return res.status(400).json({ success: false, message: 'Title, slug, and content are required' });
+    }
+
+    // Validate category exists if provided
+    if (categoryId) {
+      const category = await categoryRepo.findOne({ where: { id: String(categoryId), isActive: true } });
+      if (!category) {
+        return res.status(400).json({ success: false, message: 'The selected article category is unavailable' });
+      }
     }
 
     // Check for duplicate slug
@@ -166,34 +116,21 @@ export const createArticle = async (req: Request, res: Response, next: (error: u
 export const replaceArticle = async (req: Request, res: Response, next: (error: unknown) => void) => {
   try {
     const articleRepo = AppDataSource.getRepository(Article);
+    const categoryRepo = AppDataSource.getRepository(ArticleCategory);
     const article = await articleRepo.findOne({ where: { id: String(req.params.id) } });
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
     
-    // Manually update scalar fields to avoid TypeORM relation loading issues
-    const { title, slug, excerpt, content, featuredImage, categoryId, authorId, publicationStatus } = req.body;
+    const { categoryId, ...updateData } = req.body;
     
-    // Check for duplicate slug if slug is being changed
-    if (slug !== undefined && slug !== article.slug) {
-      const existingArticle = await articleRepo.findOne({ where: { slug } });
-      if (existingArticle) {
-        return res.status(409).json({ success: false, message: 'An article with this slug already exists' });
+    // Validate category exists if provided
+    if (categoryId) {
+      const category = await categoryRepo.findOne({ where: { id: String(categoryId), isActive: true } });
+      if (!category) {
+        return res.status(400).json({ success: false, message: 'The selected article category is unavailable' });
       }
     }
     
-    if (title !== undefined) article.title = title;
-    if (slug !== undefined) article.slug = slug;
-    if (excerpt !== undefined) article.excerpt = excerpt || undefined;
-    if (content !== undefined) article.content = content;
-    if (featuredImage !== undefined) article.featuredImage = featuredImage || undefined;
-    if (categoryId !== undefined) article.categoryId = categoryId || undefined;
-    if (authorId !== undefined) article.authorId = authorId || undefined;
-    if (publicationStatus !== undefined) article.publicationStatus = publicationStatus;
-    
-    // Update publishedAt if status changes to PUBLISHED
-    if (publicationStatus === 'PUBLISHED' && article.publicationStatus !== 'PUBLISHED') {
-      article.publishedAt = new Date();
-    }
-    
+    Object.assign(article, req.body);
     const updatedArticle = await articleRepo.save(article);
     res.json({ success: true, data: updatedArticle });
   } catch (error) {
@@ -205,34 +142,21 @@ export const replaceArticle = async (req: Request, res: Response, next: (error: 
 export const updateArticle = async (req: Request, res: Response, next: (error: unknown) => void) => {
   try {
     const articleRepo = AppDataSource.getRepository(Article);
+    const categoryRepo = AppDataSource.getRepository(ArticleCategory);
     const article = await articleRepo.findOne({ where: { id: String(req.params.id) } });
     if (!article) return res.status(404).json({ success: false, message: 'Article not found' });
     
-    // Manually update scalar fields to avoid TypeORM relation loading issues
-    const { title, slug, excerpt, content, featuredImage, categoryId, authorId, publicationStatus } = req.body;
+    const { categoryId, ...updateData } = req.body;
     
-    // Check for duplicate slug if slug is being changed
-    if (slug !== undefined && slug !== article.slug) {
-      const existingArticle = await articleRepo.findOne({ where: { slug } });
-      if (existingArticle) {
-        return res.status(409).json({ success: false, message: 'An article with this slug already exists' });
+    // Validate category exists if provided
+    if (categoryId) {
+      const category = await categoryRepo.findOne({ where: { id: String(categoryId), isActive: true } });
+      if (!category) {
+        return res.status(400).json({ success: false, message: 'The selected article category is unavailable' });
       }
     }
     
-    if (title !== undefined) article.title = title;
-    if (slug !== undefined) article.slug = slug;
-    if (excerpt !== undefined) article.excerpt = excerpt || undefined;
-    if (content !== undefined) article.content = content;
-    if (featuredImage !== undefined) article.featuredImage = featuredImage || undefined;
-    if (categoryId !== undefined) article.categoryId = categoryId || undefined;
-    if (authorId !== undefined) article.authorId = authorId || undefined;
-    if (publicationStatus !== undefined) article.publicationStatus = publicationStatus;
-    
-    // Update publishedAt if status changes to PUBLISHED
-    if (publicationStatus === 'PUBLISHED' && article.publicationStatus !== 'PUBLISHED') {
-      article.publishedAt = new Date();
-    }
-    
+    Object.assign(article, req.body);
     const updatedArticle = await articleRepo.save(article);
     res.json({ success: true, data: updatedArticle });
   } catch (error) {
