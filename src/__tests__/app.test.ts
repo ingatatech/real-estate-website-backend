@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../app.js';
+import app from '../app';
 
 describe.skip('API Health Check', () => {
   it('should return success message for root endpoint', async () => {

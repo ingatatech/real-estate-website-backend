@@ -1,8 +1,8 @@
 import request from 'supertest';
-import { AppDataSource } from '../lib/typeorm.js';
-import { User } from '../entities/User.js';
-import { Role } from '../entities/Role.js';
-import app from '../app.js';
+import { AppDataSource } from '../lib/typeorm';
+import { User } from '../entities/User';
+import { Role } from '../entities/Role';
+import app from '../app';
 
 describe.skip('Auth Controller', () => {
   beforeAll(async () => {

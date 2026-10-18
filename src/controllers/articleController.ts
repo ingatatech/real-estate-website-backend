@@ -42,7 +42,10 @@ export const getArticles = async (req: Request, res: Response, next: (error: unk
         totalPages: Math.max(1, Math.ceil(total / limit))
       }
     });
-  } catch (error) { next(error); }
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    next(error);
+  }
 };
 
 export const getArticleBySlug = async (req: Request, res: Response, next: (error: unknown) => void) => {
@@ -82,6 +85,12 @@ export const createArticle = async (req: Request, res: Response, next: (error: u
     if (categoryId) {
       const category = await categoryRepo.findOne({ where: { id: String(categoryId), isActive: true } });
       if (!category) return res.status(400).json({ success: false, message: 'The selected article category is unavailable' });
+    }
+
+    // Check for duplicate slug
+    const existingArticle = await articleRepo.findOne({ where: { slug } });
+    if (existingArticle) {
+      return res.status(409).json({ success: false, message: 'An article with this slug already exists' });
     }
 
     const article = articleRepo.create({
