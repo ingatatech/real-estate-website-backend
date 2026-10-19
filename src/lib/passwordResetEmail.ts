@@ -7,22 +7,28 @@ interface MailConfig {
 }
 
 const getMailConfig = (): MailConfig | null => {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, FRONTEND_URL } = process.env;
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM || !FRONTEND_URL) return null;
+  const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+  const portStr = process.env.SMTP_PORT || process.env.EMAIL_PORT;
+  const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
+  const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user;
+  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://ingata-real-estate.vercel.app';
 
-  const port = Number(SMTP_PORT);
+  if (!host || !portStr || !user || !pass || !from) return null;
+
+  const port = Number(portStr);
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error('SMTP_PORT must be a valid port number.');
   }
 
   return {
-    frontendUrl: FRONTEND_URL.replace(/\/+$/, ''),
-    from: SMTP_FROM,
+    frontendUrl: frontendUrl.replace(/\/+$/, ''),
+    from,
     transporter: nodemailer.createTransport({
-      host: SMTP_HOST,
+      host,
       port,
       secure: process.env.SMTP_SECURE === 'true' || port === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS },
+      auth: { user, pass },
     }),
   };
 };
