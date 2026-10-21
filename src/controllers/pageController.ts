@@ -16,7 +16,7 @@ export const getPageBySlug = async (req: Request, res: Response, next: (error: u
   try {
     const pageRepo = AppDataSource.getRepository(SitePage);
     const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
-    const page = await pageRepo.findOne({ where: { slug } });
+    const page = await pageRepo.findOne({ where: { slug, isPublished: true } });
     if (!page) return res.status(404).json({ success: false, message: 'Page not found' });
     res.json({ success: true, data: page });
   } catch (error) {
