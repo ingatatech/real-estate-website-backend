@@ -1,16 +1,18 @@
 import { Router } from 'express';
 import { adminLogin, forgotPassword, getMe, login, logout, register, resetPassword, updateProfile } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';
+import { authRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
-router.post('/login', login);
-router.post('/register', register);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+// Apply stricter rate limiting to authentication endpoints
+router.post('/login', authRateLimiter, login);
+router.post('/register', authRateLimiter, register);
+router.post('/forgot-password', authRateLimiter, forgotPassword);
+router.post('/reset-password', authRateLimiter, resetPassword);
 router.post('/logout', logout);
 router.get('/me', requireAuth, getMe);
 router.patch('/profile', requireAuth, updateProfile);
-router.post('/admin/login', adminLogin);
+router.post('/admin/login', authRateLimiter, adminLogin);
 
 export default router;

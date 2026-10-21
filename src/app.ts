@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import routes from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { initSentry } from './config/sentry.js';
+import { apiRateLimiter } from './middleware/rateLimiter.js';
+
+// Initialize Sentry
+initSentry();
 
 const app = express();
 
@@ -18,6 +23,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Apply rate limiting to all API routes
+app.use('/api/v1', apiRateLimiter);
 
 app.get('/', (_req, res) => {
 	res.json({

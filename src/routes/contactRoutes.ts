@@ -7,11 +7,12 @@ import {
   replaceContactMessage,
   updateContactMessage,
 } from '../controllers/contactController.js';
+import { contactRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
 router.get('/', getContactMessages);
-router.post('/', createContactMessage);
+router.post('/', contactRateLimiter, createContactMessage);
 router.get('/:id', getContactMessageById);
 router.put('/:id', replaceContactMessage);
 router.patch('/:id', updateContactMessage);

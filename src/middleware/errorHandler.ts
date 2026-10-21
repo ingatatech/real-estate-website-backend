@@ -1,13 +1,27 @@
 import type { NextFunction, Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 
 export const errorHandler = (
   err: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
+  // Log error to console
   console.error('Error:', err.message);
   console.error('Stack:', err.stack);
+
+  // Send error to Sentry if initialized
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(err, {
+      extra: {
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      },
+    });
+  }
 
   // In production, don't expose detailed error messages
   const isDevelopment = process.env.NODE_ENV === 'development';
