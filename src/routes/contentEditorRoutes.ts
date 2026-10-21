@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 import {
   createArticle,
   deleteArticle,
@@ -21,6 +22,15 @@ import {
   replacePage,
   updatePage,
 } from '../controllers/pageController.js';
+import {
+  createTestimonial,
+  deleteTestimonial,
+  getTestimonialById,
+  getTestimonials,
+  replaceTestimonial,
+  updateTestimonial,
+} from '../controllers/testimonialController.js';
+import { uploadPropertyMedia } from '../controllers/propertyMediaController.js';
 import { requireAuth } from '../middleware/auth.js';
 import { authorize } from '../middleware/authorize.js';
 
@@ -51,5 +61,17 @@ router.post('/pages', createPage);
 router.put('/pages/:id', replacePage);
 router.patch('/pages/:id', updatePage);
 router.delete('/pages/:id', deletePage);
+
+// Content Editor can manage testimonials
+router.get('/testimonials', getTestimonials);
+router.get('/testimonials/:id', getTestimonialById);
+router.post('/testimonials', createTestimonial);
+router.put('/testimonials/:id', replaceTestimonial);
+router.patch('/testimonials/:id', updateTestimonial);
+router.delete('/testimonials/:id', deleteTestimonial);
+
+// Content Editor can upload media
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
+router.post('/media', upload.single('file'), uploadPropertyMedia);
 
 export default router;
