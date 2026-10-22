@@ -80,6 +80,11 @@ export const getAdminProperties = async (req: Request, res: Response, next: (err
       propertyManager: p.propertyManager ? { id: p.propertyManager.id, name: p.propertyManager.name } : null,
       category: p.category ? { id: p.category.id, name: p.category.name } : null,
       development: p.development ? { id: p.development.id, name: p.development.name } : null,
+      images: p.propertyImages?.map(img => ({
+        imageUrl: img.imageUrl,
+        mediaType: img.mediaType,
+        isPrimary: img.isPrimary,
+      })) || [],
     }));
 
     const response: Record<string, unknown> = {
@@ -127,6 +132,11 @@ export const getAdminProperty = async (req: Request, res: Response, next: (error
       category: property.category ? { id: property.category.id, name: property.category.name } : null,
       development: property.development ? { id: property.development.id, name: property.development.name } : null,
       propertyImages: property.propertyImages ? property.propertyImages.sort((a, b) => a.displayOrder - b.displayOrder) : [],
+      images: property.propertyImages?.map(img => ({
+        imageUrl: img.imageUrl,
+        mediaType: img.mediaType,
+        isPrimary: img.isPrimary,
+      })) || [],
     };
 
     return res.json({ success: true, data: filteredProperty });

@@ -97,6 +97,11 @@ export const getAgentProperties = async (req: Request, res: Response, next: (err
       ...p,
       category: p.category ? { id: p.category.id, name: p.category.name, slug: p.category.slug } : null,
       propertyImages: p.propertyImages ? p.propertyImages.sort((a, b) => a.displayOrder - b.displayOrder) : [],
+      images: p.propertyImages?.map(img => ({
+        imageUrl: img.imageUrl,
+        mediaType: img.mediaType,
+        isPrimary: img.isPrimary,
+      })) || [],
     }));
 
     res.json({ success: true, data: filteredProperties });
@@ -136,6 +141,11 @@ export const getAgentProperty = async (req: Request, res: Response, next: (error
       ...property,
       category: property.category ? { id: property.category.id, name: property.category.name, slug: property.category.slug } : null,
       propertyImages: property.propertyImages ? property.propertyImages.sort((a, b) => a.displayOrder - b.displayOrder) : [],
+      images: property.propertyImages?.map(img => ({
+        imageUrl: img.imageUrl,
+        mediaType: img.mediaType,
+        isPrimary: img.isPrimary,
+      })) || [],
     };
 
     res.json({ success: true, data: sortedProperty });
