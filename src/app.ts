@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import routes from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { initSentry } from './config/sentry.js';
@@ -20,6 +21,21 @@ const allowedOrigins = [
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
+}));
+
+// Security headers with Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "https://unpkg.com"],
+      scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "https://ingata-backend.onrender.com", "http://localhost:5000"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Needed for Leaflet maps
 }));
 
 app.use(express.json());
