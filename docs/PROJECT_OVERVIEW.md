@@ -2,7 +2,7 @@
 
 ## Ingata Real Estate Platform
 
-**Last Updated:** October 19, 2026  
+**Last Updated:** October 22, 2026  
 **Status:** Production Deployed (Vercel Frontend + Render Backend)  
 **Version:** 1.0.0
 
@@ -122,14 +122,21 @@ realestateweb/
 | How It Works Section | ✅ Complete | Customer journey section on homepage |
 | Property Features Management | ✅ Complete | Admin UI for property features CRUD |
 | Development Management | ✅ Complete | Admin UI for developments CRUD |
+| CSRF Protection | ✅ Complete | Helmet middleware implemented (disabled for JWT API) |
+| Rate Limiting | ✅ Complete | API, auth, contact, search limiters implemented |
+| Error Tracking | ✅ Complete | Sentry integration configured |
+| CI/CD Pipeline | ✅ Complete | Render (backend) and Vercel (frontend) auto-deploy on git push |
+| Property Comparison | ✅ Complete | Compare up to 5 properties side-by-side |
+| Mortgage Calculator | ✅ Complete | Calculate monthly mortgage payments with breakdown |
+| Rental Yield Calculator | ✅ Complete | Calculate gross and net rental yields |
 
 ### Partially Implemented Features ⚠️
 
 | Feature | Status | Issues | Next Steps |
 |---------|--------|--------|------------|
-| Maps Integration | ⚠️ Partial | No map components found in codebase | Create PropertyMap and PropertySearchMap components |
-| Media Upload | ⚠️ Partial | Supabase Storage configured, requires env vars | Configure SUPABASE_URL and keys in production |
-| Analytics Data Cleanup | ⚠️ Partial | Manual cleanup endpoint exists, no automation | Add cron job/scheduled task for automated cleanup |
+| Maps Integration | ✅ Complete | Leaflet + OpenStreetMap implemented | Integrate PropertySearchMap into listings page |
+| Media Upload | ✅ Complete | Supabase Storage configured, requires env vars | Configure SUPABASE_URL and keys in production |
+| Analytics Data Cleanup | ✅ Complete | Automated daily cleanup via node-cron | N/A |
 | Advanced Search | ⚠️ Partial | Extensive filters exist, no map-based search | Add map view with property markers |
 | Image Optimization | ⚠️ Partial | Next.js Image configured for localhost only | Add production image domains to remotePatterns |
 
@@ -137,15 +144,11 @@ realestateweb/
 
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
-| Property Comparison | ❌ Not Started | Low | Comparison tool not implemented |
-| Mortgage Calculator | ❌ Not Started | Low | Not implemented |
-| Rental Yield Calculator | ❌ Not Started | Low | Not implemented |
-| Automated Testing | ⚠️ Partial | High | Test infrastructure exists, limited test coverage |
-| CI/CD Pipeline | ❌ Not Started | High | No deployment automation |
-| Docker Configuration | ❌ Not Started | Medium | No Dockerfile or docker-compose |
-| CSRF Protection | ❌ Not Started | Medium | Security enhancement |
-| Rate Limiting | ❌ Not Started | Medium | Security enhancement |
-| Error Tracking | ❌ Not Started | Medium | No Sentry/LogRocket integration |
+| CSRF Protection | ✅ Complete | N/A | Helmet middleware implemented (disabled for JWT API) |
+| Rate Limiting | ✅ Complete | N/A | API, auth, contact, search limiters implemented |
+| Error Tracking | ✅ Complete | N/A | Sentry integration configured |
+| CI/CD Pipeline | ✅ Complete | N/A | Render (backend) and Vercel (frontend) auto-deploy on git push |
+| Automated Testing | ⚠️ Partial | Medium | Jest configured, limited test coverage |
 
 ### Migration in Progress 🔄
 
@@ -319,10 +322,11 @@ See [USER_ROLES_AND_FEATURES.md](USER_ROLES_AND_FEATURES.md) for detailed role d
 ### Login Process
 1. User submits email and password to `/auth/login` or `/auth/admin/login`
 2. Server validates credentials with bcrypt
-3. Server generates JWT token (7-day expiration)
+3. Server generates JWT token (5-minute expiration)
 4. Server returns `{ token, user }`
 5. Client stores token in localStorage (`admin_token`)
 6. Client includes token in `Authorization: Bearer <token>` header
+7. Frontend auto-logout after 5 minutes of inactivity
 
 ### Password Reset Flow
 1. User submits email to `/auth/forgot-password`
@@ -430,10 +434,8 @@ See [INSTALLATION_AND_SETUP.md](INSTALLATION_AND_SETUP.md) for detailed setup in
 3. **No Deployment Configuration:** No Dockerfile, CI/CD, or production deployment guides.
 
 ### Medium Priority
-1. **Analytics Data Cleanup:** Retention policy field added but no cleanup job implemented.
-2. **Property Features UI:** Database exists but no admin interface for managing features.
-3. **Development Management UI:** Database exists but no admin interface.
-4. **Maps Integration:** Single property map exists in PropertyDetails page, but PropertySearchMap is not integrated into listings page.
+1. **Property Features UI:** Database exists but no admin interface for managing features.
+2. **Development Management UI:** Database exists but no admin interface.
 
 ### Low Priority
 1. **Supabase Dependencies:** Unused libraries that could be removed.
