@@ -1,31 +1,67 @@
-# Staff portal authentication
+# Ingata Real Estate
 
-Staff users sign in at `/portal/login`. After successful authentication, the portal routes agents, property managers, and content editors to role-specific workspaces. Admins continue to use the existing `/admin` portal.
+Ingata Real Estate is a full-stack property website and staff portal. The public site exposes property discovery, enquiries, viewing, valuation, listing, and content pages. The staff portal provides role-specific workspaces for administrators, agents, property managers, and content editors.
 
-## Password reset email configuration
+## Technology
 
-Configure these backend environment variables before enabling password reset:
+- Frontend: Next.js App Router, React, TypeScript, Tailwind CSS
+- Backend: Express, TypeScript, TypeORM, PostgreSQL (Render)
+- Integrations: SMTP via Nodemailer (requires configuration), JWT authentication, Leaflet maps (OpenStreetMap)
+- Deployment: Vercel (frontend), Render.com (backend + database)
+- Security: Helmet security headers, rate limiting, scheduled analytics cleanup, CSRF protection
 
-```env
-FRONTEND_URL=http://localhost:3000
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM=
-```
+## Prerequisites
 
-Use the SMTP host, port, username, password, and verified sender address supplied by your organization. Keep credentials in the backend environment only; do not add them to source control or frontend environment variables. Use `SMTP_SECURE=true` for implicit TLS (commonly port 465); for STARTTLS, use port 587 with `SMTP_SECURE=false`.
+- Node.js and npm
+- PostgreSQL database reachable by the backend
+- Backend environment configuration (see [installation guide](docs/INSTALLATION_AND_SETUP.md))
+- Supabase Storage and SMTP only when media upload and password-reset/email features are required
 
-Apply the database migration from the backend directory after deploying the backend changes:
+## Quick start
 
 ```sh
-npm run migration:run
+npm --prefix frontend install
+npm --prefix backend install
+
+npm --prefix backend run dev
+npm --prefix frontend run dev
 ```
 
-Reset links are single-use and expire after 30 minutes. The request endpoint returns a generic success message to avoid revealing whether an email belongs to an account. Until SMTP is configured and the migration has run, the reset flow cannot complete.
+The frontend defaults to `http://localhost:3000`; the backend defaults to `http://localhost:5000`. The API is mounted at `/api/v1`.
 
-Property managers can upload property images and videos from the Properties section of their portal. Their permission is role-based; agents and property owners continue to require the individual media-upload permission.
+Run database migrations only after configuring the backend database:
 
-User accounts, credentials, roles, and agent profile details are managed from the admin Users screen. Apply pending migrations with `npm run migration:run` from the backend directory to merge existing role rows whose names differ only by casing or surrounding whitespace and enforce normalized role-name uniqueness.
+```sh
+npm --prefix backend run migration:run
+```
+
+## Development commands
+
+```sh
+# Frontend
+npm run dev
+npm run build
+npm run start
+npm --prefix frontend run typecheck
+
+# Backend
+npm --prefix backend run dev
+npm --prefix backend run build
+npm --prefix backend run migration:run
+npm --prefix backend run seed
+```
+
+## Documentation
+
+- [Project overview](docs/PROJECT_OVERVIEW.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Installation and setup](docs/INSTALLATION_AND_SETUP.md)
+- [Database schema](docs/DATABASE_SCHEMA.md)
+- [API reference](docs/API_REFERENCE.md)
+- [Authentication and permissions](docs/AUTHENTICATION_AND_PERMISSIONS.md)
+- [User roles and features](docs/USER_ROLES_AND_FEATURES.md)
+- [Testing and known issues](docs/TESTING_AND_KNOWN_ISSUES.md)
+- [Deployment guide](docs/DEPLOYMENT_GUIDE.md)
+- [Development roadmap](docs/DEVELOPMENT_ROADMAP.md)
+
+The documentation records source-verified behavior as of the audit. Deployment state, live database migration state, and third-party account configuration require manual verification.
