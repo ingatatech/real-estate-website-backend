@@ -2,7 +2,7 @@
 
 ## Ingata Real Estate Platform
 
-**Last Updated:** October 22, 2026  
+**Last Updated:** October 27, 2026  
 **Status:** Production Deployed (Vercel Frontend + Render Backend)  
 **Version:** 1.0.0
 
@@ -20,13 +20,18 @@ Ingata Real Estate is a full-stack web application for managing property listing
 - Analytics tracking (page views, property views, click events)
 - Password reset via email
 - Responsive design with Tailwind CSS
+- Interactive maps with Leaflet
+- Property comparison and calculators
 
 ### Technology Stack
 - **Backend:** Node.js, Express.js, TypeScript, TypeORM, PostgreSQL (Render/Neon)
 - **Frontend:** Next.js 15 (App Router), TypeScript, Tailwind CSS
-- **Authentication:** JWT with bcryptjs
+- **Authentication:** JWT with bcryptjs (5-minute token expiration)
 - **Database:** PostgreSQL via TypeORM (Render PostgreSQL)
-- **Email:** Nodemailer (SMTP) - requires configuration
+- **Email:** Nodemailer with Brevo SMTP
+- **Media Storage:** Supabase Storage
+- **Maps:** Leaflet + OpenStreetMap (no API key required)
+- **Error Tracking:** Sentry
 - **Deployment:** Vercel (frontend), Render.com (backend)
 
 ---
@@ -37,28 +42,25 @@ Ingata Real Estate is a full-stack web application for managing property listing
 realestateweb/
 ├── backend/                    # Express.js API server
 │   ├── src/
-│   │   ├── controllers/       # Request handlers (33 files)
-│   │   ├── entities/          # TypeORM models (28 entities)
+│   │   ├── controllers/       # Request handlers (35 files)
+│   │   ├── entities/          # TypeORM models (30 entities)
 │   │   ├── routes/            # API routes (45 files)
-│   │   ├── middleware/        # Auth, authorization, validation
+│   │   ├── middleware/        # Auth, authorization, validation (7 files)
 │   │   ├── migrations/        # Database migrations (9 files)
 │   │   ├── lib/               # TypeORM config, email utilities
 │   │   ├── config/            # Database and environment config
+│   │   ├── services/          # Scheduled tasks
 │   │   ├── app.ts             # Express app setup
-│   │   ├── server.ts          # Server entry point
-│   │   └── seed.ts            # Database seeding
+│   │   └── server.ts          # Server entry point
 │   ├── database/
-│   │   └── migrations/        # SQL migrations (1 file)
-│   ├── .env                   # Environment variables (gitignored)
+│   │   └── migrations/        # SQL migrations
 │   ├── render.yaml            # Render deployment configuration
-│   ├── DEPLOYMENT.md          # Render deployment guide
 │   └── package.json
 ├── frontend/                   # Next.js 15 application
 │   ├── app/                   # App Router pages
 │   │   ├── admin/            # Admin dashboard
 │   │   ├── portal/           # Staff portal (agent/PM/editor)
 │   │   ├── properties/       # Property pages
-│   │   ├── agents/           # Agent directory
 │   │   ├── services/         # Services pages
 │   │   ├── about/            # About section
 │   │   ├── contact/          # Contact page
@@ -66,21 +68,17 @@ realestateweb/
 │   │   ├── layout.tsx        # Root layout
 │   │   └── page.tsx          # Homepage
 │   ├── src/
-│   │   ├── components/       # React components (25 components)
+│   │   ├── components/       # React components (25+ components)
 │   │   ├── context/          # React contexts (AuthContext)
 │   │   ├── legacy-pages/     # Legacy pages (92 files, migration in progress)
 │   │   ├── services/         # API client (api.ts, portalApi, adminApi)
 │   │   ├── hooks/            # Custom React hooks
 │   │   └── utils/            # Utility functions
 │   ├── public/               # Static assets
-│   ├── .env                  # Environment variables (gitignored)
 │   └── package.json
-├── docs/                     # Documentation (this folder)
-├── scripts/                  # Utility scripts
-├── .postman/                 # Postman workspace
-├── package.json              # Root package.json
+├── docs/                     # Documentation
 ├── agent.md                  # Development rules
-└── README.md                 # Root README
+└── backend/README.md         # Backend-specific notes
 ```
 
 ---
@@ -89,66 +87,65 @@ realestateweb/
 
 ### Implemented Features ✅
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| User Authentication (JWT) | ✅ Complete | Login, register, logout, profile update |
-| Admin Dashboard | ✅ Complete | Full CRUD for all entities |
-| Agent Dashboard | ✅ Complete | Manage assigned properties, inquiries, viewings |
-| Property Manager Dashboard | ✅ Complete | Manage properties, assign agents, approve listings |
-| Content Editor Dashboard | ✅ Complete | CMS for articles, pages, FAQs |
-| Property Listings | ✅ Complete | CRUD with images/videos, categories, features |
-| Property Search | ✅ Complete | Basic search with filters |
-| Inquiries | ✅ Complete | Property inquiries with status tracking |
-| Viewing Requests | ✅ Complete | Schedule and manage property viewings |
-| Listing Requests | ✅ Complete | User-submitted listings with approval workflow |
-| Valuation Requests | ✅ Complete | Property valuation requests |
-| Contact Form | ✅ Complete | Contact messages with reply functionality |
-| Articles/Insights | ✅ Complete | Blog with categories and publishing workflow |
-| FAQs | ✅ Complete | FAQ management with categories |
-| Services | ✅ Complete | Service offerings management |
-| Testimonials | ✅ Complete | Customer testimonials |
-| Site Settings | ✅ Complete | Configurable site-wide settings |
-| Analytics Tracking | ✅ Complete | Page views, property views, click events |
-| Analytics Dashboard | ✅ Complete | Role-based analytics access |
-| Password Reset | ✅ Complete | Email-based password reset (requires SMTP) |
-| Favorites | ✅ Complete | User favorite properties |
-| Agent Profiles | ✅ Complete | Public agent directory with profiles |
-| Property Categories | ✅ Complete | Hierarchical property categorization |
-| Article Categories | ✅ Complete | Article categorization |
-| Site Pages | ✅ Complete | Static page CMS |
-| Related Properties | ✅ Complete | Similar properties shown on property details page |
-| SEO Optimization | ✅ Complete | Sitemap, structured data, dynamic meta tags |
-| Why Choose Us Section | ✅ Complete | Homepage section with 5 value propositions |
-| How It Works Section | ✅ Complete | Customer journey section on homepage |
-| Property Features Management | ✅ Complete | Admin UI for property features CRUD |
-| Development Management | ✅ Complete | Admin UI for developments CRUD |
-| CSRF Protection | ✅ Complete | Helmet middleware implemented (disabled for JWT API) |
-| Rate Limiting | ✅ Complete | API, auth, contact, search limiters implemented |
-| Error Tracking | ✅ Complete | Sentry integration configured |
-| CI/CD Pipeline | ✅ Complete | Render (backend) and Vercel (frontend) auto-deploy on git push |
-| Property Comparison | ✅ Complete | Compare up to 5 properties side-by-side |
-| Mortgage Calculator | ✅ Complete | Calculate monthly mortgage payments with breakdown |
-| Rental Yield Calculator | ✅ Complete | Calculate gross and net rental yields |
-| Maps Integration | ✅ Complete | Leaflet + OpenStreetMap with property markers on listings page |
-| Media Upload | ✅ Complete | Supabase Storage configured (requires env vars in production) |
-| Analytics Data Cleanup | ✅ Complete | Automated daily cleanup via node-cron |
-| Advanced Search | ✅ Complete | Extensive filters with map view and property markers |
-| Image Optimization | ✅ Complete | Next.js Image configured with production domains |
+|| Feature | Status | Notes |
+||---------|--------|-------|
+|| User Authentication (JWT) | ✅ Complete | Login, register, logout, profile update, 5-min token expiration |
+|| Admin Dashboard | ✅ Complete | Full CRUD for all entities |
+|| Agent Dashboard | ✅ Complete | Manage assigned properties, inquiries, viewings |
+|| Property Manager Dashboard | ✅ Complete | Manage properties, assign agents, approve listings |
+|| Content Editor Dashboard | ✅ Complete | CMS for articles, pages, FAQs |
+|| Property Listings | ✅ Complete | CRUD with images/videos, categories, features |
+|| Property Search | ✅ Complete | Advanced search with filters and map view |
+|| Inquiries | ✅ Complete | Property inquiries with status tracking |
+|| Viewing Requests | ✅ Complete | Schedule and manage property viewings |
+|| Listing Requests | ✅ Complete | User-submitted listings with approval workflow |
+|| Valuation Requests | ✅ Complete | Property valuation requests |
+|| Contact Form | ✅ Complete | Contact messages with reply functionality |
+|| Articles/Insights | ✅ Complete | Blog with categories and publishing workflow |
+|| FAQs | ✅ Complete | FAQ management with categories |
+|| Services | ✅ Complete | Service offerings management |
+|| Testimonials | ✅ Complete | Customer testimonials |
+|| Site Settings | ✅ Complete | Configurable site-wide settings |
+|| Analytics Tracking | ✅ Complete | Page views, property views, click events |
+|| Analytics Dashboard | ✅ Complete | Role-based analytics access |
+|| Password Reset | ✅ Complete | Email-based password reset (Brevo SMTP) |
+|| Favorites | ✅ Complete | User favorite properties |
+|| Agent Profiles | ✅ Complete | Public agent directory with profiles |
+|| Property Categories | ✅ Complete | Hierarchical property categorization |
+|| Article Categories | ✅ Complete | Article categorization (10 predefined categories) |
+|| Site Pages | ✅ Complete | Static page CMS |
+|| Related Properties | ✅ Complete | Similar properties shown on property details page |
+|| SEO Optimization | ✅ Complete | Sitemap, structured data, dynamic meta tags |
+|| Why Choose Us Section | ✅ Complete | Homepage section with 5 value propositions |
+|| How It Works Section | ✅ Complete | Customer journey section on homepage |
+|| Property Features Management | ✅ Complete | Admin UI for property features CRUD |
+|| Development Management | ✅ Complete | Admin UI for developments CRUD |
+|| CSRF Protection | ✅ Complete | Helmet middleware implemented (disabled for JWT API) |
+|| Rate Limiting | ✅ Complete | API, auth, contact, search limiters implemented |
+|| Error Tracking | ✅ Complete | Sentry integration configured |
+|| CI/CD Pipeline | ✅ Complete | Render (backend) and Vercel (frontend) auto-deploy on git push |
+|| Property Comparison | ✅ Complete | Compare up to 5 properties side-by-side |
+|| Mortgage Calculator | ✅ Complete | Calculate monthly mortgage payments with breakdown |
+|| Rental Yield Calculator | ✅ Complete | Calculate gross and net rental yields |
+|| Maps Integration | ✅ Complete | Leaflet + OpenStreetMap with property markers |
+|| Media Upload | ✅ Complete | Supabase Storage configured (max 100MB files) |
+|| Analytics Data Cleanup | ✅ Complete | Automated daily cleanup via node-cron |
+|| Agent Inquiry Notes | ✅ Complete | Agents can add notes and follow-up dates to inquiries |
+|| Property Manager Ownership | ✅ Complete | Property managers can own and manage properties |
+|| Cookie Consent | ✅ Complete | GDPR-compliant cookie consent management |
+|| Inactivity Logout | ✅ Complete | 5-minute timeout with 3-minute warning |
 
 ### Partially Implemented Features ⚠️
 
-*No partially implemented features at this time.*
+|| Area | Status | Progress |
+||------|--------|---------|
+|| Frontend App Router Migration | 🔄 In Progress | 92 legacy pages remain, wrappers preserve URLs |
+|| Legacy Page Cleanup | 🔄 In Progress | Gradual migration to app/ directory |
+|| Backend Testing | ⚠️ Broken | 3 test files exist but ESM configuration prevents execution |
 
 ### Unimplemented Features ❌
 
-*No unimplemented features at this time.*
-
-### Migration in Progress 🔄
-
-| Area | Status | Progress |
-|------|--------|---------|
-| Frontend App Router Migration | 🔄 In Progress | 92 legacy pages remain, wrappers preserve URLs |
-| Legacy Page Cleanup | 🔄 In Progress | Gradual migration to app/ directory |
+*No core unimplemented features at this time.*
 
 ---
 
@@ -156,7 +153,7 @@ realestateweb/
 
 ### Database: PostgreSQL (Render)
 
-**Total Tables:** 28  
+**Total Tables:** 30  
 **Migrations:** 9  
 **ORM:** TypeORM
 
@@ -164,10 +161,10 @@ realestateweb/
 
 #### Authentication & Users
 - `roles` - User roles (admin, agent, user, property_manager, content_editor)
-- `users` - User accounts with authentication fields
+- `users` - User accounts with authentication fields, password reset tokens
 
 #### Property Management
-- `properties` - Property listings
+- `properties` - Property listings with full details
 - `property_categories` - Property categories
 - `property_features` - Available features
 - `property_feature_links` - Property-feature junction table
@@ -176,11 +173,11 @@ realestateweb/
 
 #### Agents
 - `agents` - Agent profiles
-- `agent_inquiry_notes` - Agent notes on inquiries
+- `agent_inquiry_notes` - Agent notes and follow-ups on inquiries
 
 #### Content Management
 - `articles` - Blog articles
-- `article_categories` - Article categories
+- `article_categories` - Article categories (10 predefined)
 - `site_pages` - Static site pages
 - `site_settings` - Site-wide configuration
 - `services` - Service offerings
@@ -198,9 +195,9 @@ realestateweb/
 - `service_requests` - Service inquiry requests
 
 #### Analytics
-- `page_views` - Page view tracking
-- `property_views` - Property detail view tracking
-- `click_events` - User interaction tracking
+- `page_views` - Page view tracking with UTM parameters
+- `property_views` - Property detail view tracking with session duration
+- `click_events` - User interaction tracking (phone, email, WhatsApp, buttons)
 
 See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for detailed schema documentation.
 
@@ -261,6 +258,7 @@ See [API_REFERENCE.md](API_REFERENCE.md) for complete API documentation.
 - Property, category, and content management
 - Analytics access (all data)
 - Site settings configuration
+- Bypasses property manager ownership checks
 
 ### 2. Agent
 **Access:** `/portal/login` → `/portal/dashboard`
@@ -270,6 +268,7 @@ See [API_REFERENCE.md](API_REFERENCE.md) for complete API documentation.
 - Handle inquiries for assigned properties
 - Schedule viewings
 - Upload property media
+- Add notes and follow-up dates to inquiries
 - View analytics for assigned properties
 
 ### 3. Property Manager
@@ -281,6 +280,7 @@ See [API_REFERENCE.md](API_REFERENCE.md) for complete API documentation.
 - Approve/reject listing requests
 - Handle inquiries and viewings
 - Upload property media
+- Create developments and property features
 - View analytics for managed properties
 
 ### 4. Content Editor
@@ -290,7 +290,9 @@ See [API_REFERENCE.md](API_REFERENCE.md) for complete API documentation.
 - Create/edit articles
 - Create/edit site pages
 - Create/edit FAQs
+- Create/edit testimonials
 - Publish/unpublish content
+- Upload media
 
 ### 5. User (Public)
 **Access:** No login required for most features
@@ -314,20 +316,21 @@ See [USER_ROLES_AND_FEATURES.md](USER_ROLES_AND_FEATURES.md) for detailed role d
 
 ### Login Process
 1. User submits email and password to `/auth/login` or `/auth/admin/login`
-2. Server validates credentials with bcrypt
+2. Server validates credentials with bcrypt (12 rounds)
 3. Server generates JWT token (5-minute expiration)
 4. Server returns `{ token, user }`
 5. Client stores token in localStorage (`admin_token`)
 6. Client includes token in `Authorization: Bearer <token>` header
-7. Frontend auto-logout after 5 minutes of inactivity
+7. Frontend auto-logout after 5 minutes of inactivity (with 3-minute warning)
 
 ### Password Reset Flow
 1. User submits email to `/auth/forgot-password`
-2. Server generates reset token (SHA-256 hashed)
-3. Server sends email with reset link (requires SMTP configuration)
+2. Server generates reset token (32 bytes, SHA-256 hashed)
+3. Server sends email with reset link via Brevo SMTP
 4. User clicks link and enters new password
-5. Server validates token and updates password
-6. Token is single-use and expires in 30 minutes
+5. Server validates token and expiration (30 minutes)
+6. Server updates password and clears token
+7. Token is single-use and expires in 30 minutes
 
 See [AUTHENTICATION_AND_PERMISSIONS.md](AUTHENTICATION_AND_PERMISSIONS.md) for detailed authentication documentation.
 
@@ -338,32 +341,44 @@ See [AUTHENTICATION_AND_PERMISSIONS.md](AUTHENTICATION_AND_PERMISSIONS.md) for d
 ### Required Software
 - Node.js (v18 or higher recommended)
 - npm or yarn
-- PostgreSQL database (Neon recommended)
+- PostgreSQL database (Neon or Render recommended)
 - Git
 
 ### Required Environment Variables
 
 **Backend (.env):**
-```
+```env
 DATABASE_URL=postgresql://...
+DATABASE_URL_UNPOOLED=postgresql://...
 JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=5m
 PORT=5000
 NODE_ENV=development
-
-# Optional (for password reset):
 FRONTEND_URL=http://localhost:3000
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@example.com
-SMTP_PASS=your-password
-SMTP_FROM=noreply@example.com
+
+# Email (Brevo SMTP)
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@brevo.com
+EMAIL_PASSWORD=your-brevo-api-key
+EMAIL_FROM=noreply@ingata.com
+
+# Supabase Storage (optional)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SECRET_KEY=your-secret-key
+SUPABASE_PROPERTY_MEDIA_BUCKET=property-media
+
+# Sentry (optional)
+SENTRY_DSN=your-sentry-dsn
+
+# Scheduled Tasks
+ENABLE_SCHEDULED_TASKS=true
 ```
 
 **Frontend (.env):**
-```
+```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-api-key-here
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
 ---
@@ -422,17 +437,14 @@ See [INSTALLATION_AND_SETUP.md](INSTALLATION_AND_SETUP.md) for detailed setup in
 ## Known Issues
 
 ### Critical Issues
-1. **Media Upload Storage:** Multer configured but no storage provider implemented. Files may not persist.
-2. **No Automated Tests:** No test files or configuration. Manual testing only.
-3. **No Deployment Configuration:** No Dockerfile, CI/CD, or production deployment guides.
+1. **Backend Tests Broken:** Jest configured with 3 test files but ESM syntax error prevents execution. Tests need configuration fix to work with TypeScript ESM.
 
 ### Medium Priority
-1. **Property Features UI:** Database exists but no admin interface for managing features.
-2. **Development Management UI:** Database exists but no admin interface.
+1. **Legacy Page Migration:** 92 legacy pages in src/legacy-pages need migration to App Router. Hybrid routing preserves functionality but cleanup needed.
 
 ### Low Priority
-1. **Supabase Dependencies:** Unused libraries that could be removed.
-2. **Google Analytics Placeholder:** GA_MEASUREMENT_ID is placeholder.
+1. **No Refresh Token:** Users must re-authenticate every 5 minutes (JWT expiration). Consider adding refresh token implementation.
+2. **Swagger Dependencies:** swagger-jsdoc and swagger-ui-express are installed but not used. Can be removed if not planning to implement API documentation.
 
 See [TESTING_AND_KNOWN_ISSUES.md](TESTING_AND_KNOWN_ISSUES.md) for complete issue tracking.
 
@@ -440,6 +452,7 @@ See [TESTING_AND_KNOWN_ISSUES.md](TESTING_AND_KNOWN_ISSUES.md) for complete issu
 
 ## Documentation Index
 
+- [README.md](../README.md) - Root project README
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design patterns
 - [INSTALLATION_AND_SETUP.md](INSTALLATION_AND_SETUP.md) - Detailed setup instructions
 - [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Complete database schema documentation
@@ -447,8 +460,10 @@ See [TESTING_AND_KNOWN_ISSUES.md](TESTING_AND_KNOWN_ISSUES.md) for complete issu
 - [AUTHENTICATION_AND_PERMISSIONS.md](AUTHENTICATION_AND_PERMISSIONS.md) - Authentication and authorization details
 - [USER_ROLES_AND_FEATURES.md](USER_ROLES_AND_FEATURES.md) - Role-based feature documentation
 - [TESTING_AND_KNOWN_ISSUES.md](TESTING_AND_KNOWN_ISSUES.md) - Testing status and known issues
-- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Deployment instructions
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment instructions
 - [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) - Future development plans
+- [SECURITY.md](SECURITY.md) - Security documentation
+- [ANALYTICS.md](ANALYTICS.md) - Analytics implementation details
 
 ---
 
@@ -459,8 +474,9 @@ See `agent.md` in the project root for development guidelines and rules.
 
 ### Code Quality
 - TypeScript strict mode enabled
-- ESLint configured (implied)
-- Manual testing required before task completion
+- ESLint configured
+- Frontend tests: 32 tests passing (Jest)
+- Backend tests: Broken (ESM configuration issue)
 - Incremental development workflow
 
 ### Git Workflow
@@ -492,30 +508,6 @@ See `agent.md` in the project root for development guidelines and rules.
 - Analytics tracking
 - Content management system
 - Password reset functionality
-
----
-
-## SRS Compliance Audit
-
-**Audit Date:** October 19, 2026  
-**SRS Document:** SOFTWARE REQUIREMENTS SPECIFICATION REAL ESTATE
-
-### Overall Completion Status
-
-| Category | Total Requirements | Implemented | Partially Implemented | Not Implemented | Completion % |
-|-----------|-------------------|-------------|----------------------|------------------|---------------|
-| Functional Requirements (FR) | 20 | 20 | 0 | 0 | 100% |
-| Homepage Requirements | 14 | 14 | 0 | 0 | 100% |
-| Property Listings | 10 | 10 | 0 | 0 | 100% |
-| Property Search & Filtering | 4 | 4 | 0 | 0 | 100% |
-| Property Details | 8 | 8 | 0 | 0 | 100% |
-| Services | 10 | 10 | 0 | 0 | 100% |
-| Forms & Validation | 5 | 5 | 0 | 0 | 100% |
-| Admin/CMS | 15 | 15 | 0 | 0 | 100% |
-| Analytics & Tracking | 2 | 2 | 0 | 0 | 100% |
-| Legal & Compliance | 4 | 4 | 0 | 0 | 100% |
-| SEO & Performance | 3 | 3 | 0 | 0 | 100% |
-| Security | 3 | 3 | 0 | 0 | 100% |
-| **TOTAL** | **98** | **98** | **0** | **0** | **100%** |
-
-The Ingata Real Estate website demonstrates **100% completion** of the SRS requirements. All core functionality is fully operational including property listings, search, admin/CMS, analytics, security, and legal compliance.
+- Media upload with Supabase
+- Interactive maps with Leaflet
+- Property comparison and calculators

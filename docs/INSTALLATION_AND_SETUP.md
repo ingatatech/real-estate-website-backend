@@ -1,256 +1,82 @@
 # Installation and Setup Guide
 
-**Last Updated:** October 22, 2026
-
----
-
-## Table of Contents
-1. [Prerequisites](#prerequisites)
-2. [Repository Setup](#repository-setup)
-3. [Backend Setup](#backend-setup)
-4. [Frontend Setup](#frontend-setup)
-5. [Database Setup](#database-setup)
-6. [Environment Configuration](#environment-configuration)
-7. [Running the Application](#running-the-application)
-8. [Development Workflow](#development-workflow)
-9. [Troubleshooting](#troubleshooting)
+**Last Updated:** October 27, 2026
 
 ---
 
 ## Prerequisites
 
 ### Required Software
-
-| Software | Version | Purpose |
-|----------|---------|---------|
-| Node.js | 18+ (recommended) | Runtime environment |
-| npm | 9+ (or yarn 1.22+) | Package manager |
-| Git | Latest | Version control |
-| PostgreSQL | 14+ | Database (local or Neon) |
+- **Node.js:** v18 or higher (v20+ recommended)
+- **npm:** v9 or higher (comes with Node.js)
+- **Git:** For version control
+- **PostgreSQL Database:** Neon (recommended) or local PostgreSQL
 
 ### Optional Software
-
-| Software | Purpose |
-|----------|---------|
-| VS Code | Recommended IDE |
-| Postman | API testing |
-| DBeaver/pgAdmin | Database management |
-
-### Verify Installation
-
-```bash
-node --version  # Should be v18 or higher
-npm --version   # Should be v9 or higher
-git --version   # Should show version
-psql --version  # If using local PostgreSQL
-```
+- **VS Code:** Recommended IDE with extensions
+- **Postman:** For API testing
+- **Docker:** For containerized database (optional)
 
 ---
 
-## Repository Setup
+## Project Setup
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd realestateweb
 ```
 
-### 2. Install Root Dependencies
+### 2. Install Dependencies
 
+Install root dependencies (if any):
 ```bash
 npm install
 ```
 
-This installs shared development tools (TypeScript, Tailwind CSS, etc.).
-
----
-
-## Backend Setup
-
-### 1. Navigate to Backend Directory
-
+Install backend dependencies:
 ```bash
 cd backend
-```
-
-### 2. Install Backend Dependencies
-
-```bash
 npm install
 ```
 
-**Key Dependencies:**
-- express: 4.21.2
-- typeorm: 1.1.1
-- pg: 8.23.1
-- jsonwebtoken: 9.0.3
-- bcryptjs: 3.0.3
-- nodemailer: 7.0.13
-- multer: 2.4.0
-- cors: 2.8.5
-- dotenv: 16.4.5
-- tsx: 4.19.1
-
-### 3. Verify Installation
-
-```bash
-npm list --depth=0
-```
-
-### 4. Build TypeScript (Optional)
-
-```bash
-npm run build
-```
-
-This compiles TypeScript to the `dist/` directory.
-
----
-
-## Frontend Setup
-
-### 1. Navigate to Frontend Directory
-
+Install frontend dependencies:
 ```bash
 cd ../frontend
-```
-
-### 2. Install Frontend Dependencies
-
-```bash
 npm install
 ```
 
-**Key Dependencies:**
-- next: 15.0.0
-- react: 19.3.0
-- react-dom: 19.3.0
-- typescript: 6.0.3
-- tailwindcss: 3.4.19
-- lucide-react: 1.46.0
-- apexcharts: 8.1.0
+### 3. Database Setup
 
-### 3. Verify Installation
+#### Option A: Neon (Recommended)
 
-```bash
-npm list --depth=0
+1. Create a free account at [neon.tech](https://neon.tech)
+2. Create a new project
+3. Copy the connection string
+4. Copy both **Connection String** (pooled) and **Connection Details** (direct)
+
+#### Option B: Render PostgreSQL
+
+1. Create a free account at [render.com](https://render.com)
+2. Create a new PostgreSQL database
+3. Copy the **Internal Database URL** (pooled)
+4. Copy the **External Database URL** (direct)
+
+#### Option C: Local PostgreSQL
+
+1. Install PostgreSQL locally
+2. Create a database:
+```sql
+CREATE DATABASE ingata_real_estate;
 ```
-
-### 4. Type Check (Optional)
-
-```bash
-npm run typecheck
+3. Note your connection details:
 ```
-
----
-
-## Database Setup
-
-### Option 1: Neon PostgreSQL (Recommended)
-
-#### 1. Create Neon Account
-
-1. Go to [https://neon.tech](https://neon.tech)
-2. Sign up for an account
-3. Create a new project
-4. Copy the connection string
-
-#### 2. Configure Database URL
-
-The Neon connection string will be in format:
-```
-postgresql://[user]:[password]@[host]-pooler/[database]?sslmode=require
-```
-
-Add this to your backend `.env` file:
-```
-DATABASE_URL=postgresql://[user]:[password]@[host]-pooler/[database]?sslmode=require
-```
-
-#### 3. Run Migrations
-
-```bash
-cd backend
-npm run migration:run
-```
-
-#### 4. Seed Database
-
-```bash
-npm run seed
-```
-
-This creates:
-- Default roles (admin, agent, user)
-- Admin user (admin@realestate.com / admin123)
-- Test user (user@test.com / user123)
-- Property categories
-- Article categories
-- Services
-- Site settings
-
-### Option 2: Local PostgreSQL
-
-#### 1. Install PostgreSQL
-
-**Windows:**
-- Download from [https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
-- Run installer with default settings
-- Note the password you set during installation
-
-**macOS:**
-```bash
-brew install postgresql@14
-brew services start postgresql@14
-```
-
-**Linux (Ubuntu):**
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo service postgresql start
-```
-
-#### 2. Create Database
-
-```bash
-# Connect to PostgreSQL
-psql -U postgres
-
-# Create database
-CREATE DATABASE realestate;
-
-# Create user (optional, can use postgres)
-CREATE USER realestate_user WITH PASSWORD 'your_password';
-GRANT ALL PRIVILEGES ON DATABASE realestate TO realestate_user;
-
-# Exit
-\q
-```
-
-#### 3. Configure Database URL
-
-Add to backend `.env`:
-```
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=realestate_user
-DB_PASSWORD=your_password
-DB_NAME=realestate
-```
-
-Or use connection string:
-```
-DATABASE_URL=postgresql://realestate_user:your_password@localhost:5432/realestate
-```
-
-#### 4. Run Migrations and Seed
-
-```bash
-cd backend
-npm run migration:run
-npm run seed
+Host: localhost
+Port: 5432
+Database: ingata_real_estate
+Username: postgres
+Password: your_password
 ```
 
 ---
@@ -259,469 +85,527 @@ npm run seed
 
 ### Backend Environment Variables
 
-Create `backend/.env` file:
+Create a `.env` file in the `backend` directory:
 
-```bash
-# Database Configuration
-DATABASE_URL=postgresql://[user]:[password]@[host]/[database]?sslmode=require
-# OR
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=realestate_user
-DB_PASSWORD=your_password
-DB_NAME=realestate
-
+```env
 # Server Configuration
 PORT=5000
 NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+
+# Database Configuration
+DATABASE_URL=postgresql://user:password@host:port/database
+DATABASE_URL_UNPOOLED=postgresql://user:password@host:port/database
 
 # JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_SECRET=your-very-secure-random-secret-key-at-least-32-characters
 JWT_EXPIRES_IN=5m
+
+# Email Configuration (Brevo SMTP)
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@brevo.com
+EMAIL_PASSWORD=your-brevo-api-key
+EMAIL_FROM=noreply@ingata.com
+
+# Supabase Storage (for media uploads)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SECRET_KEY=your-supabase-secret-key
+SUPABASE_PROPERTY_MEDIA_BUCKET=property-media
+SUPABASE_DEVELOPMENT_MEDIA_BUCKET=development-media
+
+# Sentry Error Tracking (optional)
+SENTRY_DSN=your-sentry-dsn
+
+# Scheduled Tasks
 ENABLE_SCHEDULED_TASKS=true
-
-# Database Logging (optional)
-DB_LOGGING=false
-
-# Password Reset Email (optional but recommended)
-FRONTEND_URL=http://localhost:3000
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=noreply@yourdomain.com
 ```
 
-**Important Security Notes:**
-- Change `JWT_SECRET` to a strong random string in production
-- Use app-specific password for Gmail SMTP
+**Important Notes:**
+- `DATABASE_URL`: Use pooled connection for application
+- `DATABASE_URL_UNPOOLED`: Use direct connection for migrations
+- `JWT_SECRET`: Generate a strong random secret (min 32 characters)
+- `EMAIL_PASSWORD`: Use Brevo API key, not account password
 - Never commit `.env` file to version control
-- Use different values for development and production
 
 ### Frontend Environment Variables
 
-Create `frontend/.env` file:
+Create a `.env` file in the `frontend` directory:
 
-```bash
+```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
-**Production:**
+**Important Notes:**
+- Variables must start with `NEXT_PUBLIC_` to be exposed to browser
+- `NEXT_PUBLIC_API_URL`: Backend API base URL
+- `NEXT_PUBLIC_BASE_URL`: Frontend base URL (for absolute links)
+
+---
+
+## Database Migration
+
+### Run Migrations
+
+From the backend directory:
+
 ```bash
-NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1
+cd backend
+npm run migration:run
+```
+
+This will:
+1. Connect to the database using `DATABASE_URL_UNPOOLED`
+2. Run all pending migrations in order
+3. Create all tables, indexes, and constraints
+4. Insert default data (article categories, etc.)
+
+### Verify Migration
+
+Check if tables were created:
+
+```bash
+# Connect to your database
+psql $DATABASE_URL
+
+# List tables
+\dt
+
+# Exit
+\q
+```
+
+Expected tables (30 total):
+- roles, users, agents, properties, property_categories, etc.
+
+### Reset Database (if needed)
+
+⚠️ **Warning:** This will delete all data!
+
+```bash
+cd backend
+npm run migration:run  # Runs ResetDatabaseSchema migration
 ```
 
 ---
 
-## Running the Application
+## Database Seeding
 
-### Development Mode
+### Seed Initial Data
 
-#### 1. Start Backend Server
+From the backend directory:
+
+```bash
+cd backend
+npm run seed
+```
+
+This will:
+1. Create default roles (admin, agent, user, property_manager, content_editor)
+2. Create a default admin user
+3. Create sample categories
+4. Create sample properties (optional)
+
+### Seed Article Categories
+
+```bash
+cd backend
+npm run seed:article-categories
+```
+
+This inserts 10 predefined article categories:
+- Property Market Updates
+- Buying Guides
+- Renting Guides
+- Selling Guides
+- Property Investment
+- Property Management
+- Homeownership
+- Real Estate Trends
+- Company Announcements
+- New Developments
+
+---
+
+## Starting Development Servers
+
+### Start Backend Server
+
+From the backend directory:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Backend will start on `http://localhost:5000`
+The backend will:
+- Start on port 5000 (or configured PORT)
+- Watch for file changes with tsx
+- Hot-reload on changes
+- Connect to database
+- Initialize scheduled tasks (if enabled)
 
 Expected output:
 ```
 Database connected successfully
+[Scheduled Task] Initializing scheduled tasks...
+[Scheduled Task] Analytics cleanup job scheduled to run daily at 2:00 AM UTC
 Backend running on http://localhost:5000
 ```
 
-#### 2. Start Frontend Server
+### Start Frontend Server
+
+From the frontend directory (in a new terminal):
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Frontend will start on `http://localhost:3000`
+The frontend will:
+- Start on port 3000
+- Watch for file changes
+- Hot-reload on changes
+- Connect to backend API
 
 Expected output:
 ```
-ready - started server on 0.0.0.0:3000, url: http://localhost:3000
+▲ Next.js 15.0.0
+- Local:        http://localhost:3000
+- Network:      http://192.168.x.x:3000
 ```
 
-#### 3. Access Applications
+---
 
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:5000/api/v1
-- **Health Check:** http://localhost:5000/api/v1/health
-- **Admin Dashboard:** http://localhost:3000/admin
-- **Staff Portal:** http://localhost:3000/portal
+## Verify Installation
 
-### Production Mode
-
-#### 1. Build Backend
+### 1. Check Backend Health
 
 ```bash
-cd backend
-npm run build
+curl http://localhost:5000/api/v1/health
 ```
 
-#### 2. Build Frontend
+Expected response:
+```json
+{
+  "success": true,
+  "message": "Ingata Real Estate API is running"
+}
+```
+
+### 2. Check Frontend
+
+Open browser to: http://localhost:3000
+
+You should see:
+- Homepage with property categories
+- Navigation header
+- Footer
+- No console errors
+
+### 3. Test Admin Registration
 
 ```bash
-cd frontend
-npm run build
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "password": "Password123!",
+    "role": "admin"
+  }'
 ```
 
-#### 3. Start Backend (Production)
+### 4. Test Admin Login
 
 ```bash
-cd backend
-npm run start
+curl -X POST http://localhost:5000/api/v1/auth/admin/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "Password123!"
+  }'
 ```
 
-#### 4. Start Frontend (Production)
-
-```bash
-cd frontend
-npm run start
+Expected response:
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "...",
+    "email": "admin@example.com",
+    "role": "admin"
+  }
+}
 ```
 
-**Note:** For production deployment, use a process manager like PM2 or systemd.
+---
+
+## Common Setup Issues
+
+### Database Connection Failed
+
+**Problem:** `Database connection failed: connection refused`
+
+**Solutions:**
+1. Verify DATABASE_URL is correct
+2. Check PostgreSQL is running
+3. Check firewall allows connection
+4. Verify credentials (username, password)
+5. Try using DATABASE_URL_UNPOOLED for testing
+
+### Migration Failed
+
+**Problem:** Migration fails with error
+
+**Solutions:**
+1. Use DATABASE_URL_UNPOOLED for migrations
+2. Check if tables already exist (drop if needed)
+3. Verify database user has CREATE TABLE permissions
+4. Check migration logs for specific error
+
+### Frontend Cannot Connect to Backend
+
+**Problem:** API calls fail with network error
+
+**Solutions:**
+1. Verify backend is running on correct port
+2. Check NEXT_PUBLIC_API_URL in frontend .env
+3. Check CORS configuration in backend
+4. Verify no firewall blocking connections
+
+### Email Not Sending
+
+**Problem:** Password reset emails not sending
+
+**Solutions:**
+1. Verify Brevo SMTP credentials
+2. Check EMAIL_HOST and EMAIL_PORT
+3. Verify EMAIL_FROM is a verified sender
+4. Check Brevo API key permissions
+5. Test SMTP connection separately
+
+### TypeORM Compilation Errors
+
+**Problem:** TypeScript compilation fails
+
+**Solutions:**
+1. Run `npm run build` to see specific errors
+2. Check entity decorators are correct
+3. Verify all imports are correct
+4. Clear node_modules and reinstall: `rm -rf node_modules && npm install`
 
 ---
 
 ## Development Workflow
 
-### Recommended Workflow
+### Recommended Branch Strategy
 
-#### 1. Feature Development
+```
+main           # Production code
+develop        # Integration branch
+feature/*      # Feature branches
+bugfix/*       # Bug fix branches
+```
 
+### Development Steps
+
+1. Create feature branch:
 ```bash
-# Create feature branch
 git checkout -b feature/your-feature-name
-
-# Make changes
-# Test changes
-
-# Commit changes
-git add .
-git commit -m "Add your feature"
-
-# Push and create PR
-git push origin feature/your-feature-name
 ```
 
-#### 2. Running Commands
+2. Make changes and test locally
 
-**From Root Directory:**
-```bash
-npm run dev          # Start frontend only
-npm run build        # Build frontend only
-npm run start        # Start frontend production
-```
-
-**From Backend Directory:**
-```bash
-npm run dev          # Start backend with hot reload
-npm run build        # Build TypeScript
-npm run start        # Start production server
-npm run migration:run  # Run migrations
-npm run seed         # Seed database
-```
-
-**From Frontend Directory:**
-```bash
-npm run dev          # Start frontend with hot reload
-npm run build        # Build for production
-npm run start        # Start production server
-npm run typecheck    # Type check only
-```
-
-#### 3. Database Changes
-
-**For Schema Changes:**
-```bash
-cd backend
-
-# Generate new migration (manual)
-# Create file in src/migrations/ with timestamp
-
-# Run migration
-npm run migration:run
-
-# Test migration
-```
-
-**For Data Changes:**
-```bash
-cd backend
-
-# Edit seed.ts
-npm run seed
-```
-
-#### 4. Testing Changes
-
-**Manual Testing Checklist:**
-1. Test changed functionality
-2. Check for console errors
-3. Check for build errors
-4. Test affected existing functionality
-5. Test responsive behavior (if UI changed)
-6. Fix any errors found
-
-### Code Quality
-
-#### TypeScript Compilation
-
+3. Run type checking:
 ```bash
 # Backend
 cd backend
-npm run build
+npm run typecheck
 
 # Frontend
 cd frontend
 npm run typecheck
 ```
 
-#### Linting
+4. Run tests:
+```bash
+# Frontend
+cd frontend
+npm test
 
-No ESLint configuration found currently. To add:
+# Backend (currently broken, needs ESM fix)
+cd backend
+npm test
+```
+
+5. Build to verify:
+```bash
+# Backend
+cd backend
+npm run build
+
+# Frontend
+cd frontend
+npm run build
+```
+
+6. Commit changes:
+```bash
+git add .
+git commit -m "feat: add your feature description"
+```
+
+7. Push and create pull request
+
+---
+
+## IDE Setup
+
+### VS Code Extensions (Recommended)
+
+- **ESLint:** Linting support
+- **Prettier:** Code formatting
+- **TypeScript Vue Plugin (Volar):** TypeScript support
+- **Tailwind CSS IntelliSense:** Tailwind autocomplete
+- **PostgreSQL:** Database management
+- **Thunder Client:** API testing (alternative to Postman)
+
+### VS Code Settings
+
+Create `.vscode/settings.json`:
+
+```json
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ]
+}
+```
+
+---
+
+## Production Build
+
+### Backend Production Build
 
 ```bash
-npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-npx eslint --init
+cd backend
+npm run build
+```
+
+This compiles TypeScript to JavaScript in `dist/` directory.
+
+### Frontend Production Build
+
+```bash
+cd frontend
+npm run build
+```
+
+This creates an optimized production build in `.next/` directory.
+
+### Test Production Build Locally
+
+```bash
+# Backend
+cd backend
+npm start
+
+# Frontend
+cd frontend
+npm start
 ```
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
+### Port Already in Use
 
-#### 1. Database Connection Failed
+**Problem:** `EADDRINUSE: address already in use :::5000`
 
-**Error:** `Database connection failed`
-
-**Solutions:**
-- Verify DATABASE_URL is correct
-- Check database is running
-- Verify credentials
-- Check firewall settings
-- For Neon: verify connection string format
-
-#### 2. Migration Failed
-
-**Error:** Migration execution failed
-
-**Solutions:**
-- Check database connection
-- Verify migration file syntax
-- Check for migration conflicts
-- Review migration logs
-- Rollback if needed (manual process)
-
-#### 3. Port Already in Use
-
-**Error:** `EADDRINUSE: address already in use`
-
-**Solutions:**
+**Solution:**
 ```bash
 # Find process using port
+# Linux/Mac
+lsof -i :5000
+kill -9 <PID>
+
 # Windows
 netstat -ano | findstr :5000
 taskkill /PID <PID> /F
-
-# macOS/Linux
-lsof -ti:5000 | xargs kill -9
-
-# Or use different port
-PORT=5001 npm run dev
 ```
 
-#### 4. JWT Secret Not Set
+### Module Not Found
 
-**Error:** JWT verification failed
+**Problem:** `Cannot find module '...`
 
-**Solutions:**
-- Verify JWT_SECRET in backend/.env
-- Restart backend after changing .env
-- Use strong random string for production
-
-#### 5. CORS Errors
-
-**Error:** CORS policy error in browser
-
-**Solutions:**
-- Backend CORS middleware is configured with default settings
-- For production, configure specific origins
-- Check frontend API URL matches backend
-
-#### 6. Module Not Found
-
-**Error:** `Cannot find module 'xxx'`
-
-**Solutions:**
+**Solution:**
 ```bash
-cd backend  # or frontend
+cd backend
+rm -rf node_modules package-lock.json
+npm install
+
+cd ../frontend
+rm -rf node_modules package-lock.json
 npm install
 ```
 
-#### 7. TypeScript Compilation Errors
+### Permission Denied
 
-**Error:** TypeScript compilation failed
+**Problem:** `Error: EACCES: permission denied`
 
-**Solutions:**
-- Check tsconfig.json configuration
-- Verify all dependencies installed
-- Check for type errors
-- Run `npm run build` to see specific errors
-
-#### 8. Password Reset Not Working
-
-**Error:** Password reset email not sending
-
-**Solutions:**
-- Verify SMTP configuration in backend/.env
-- Check SMTP credentials
-- Verify SMTP_FROM is verified email
-- Check email spam folder
-- Test SMTP configuration with tool like [smtpjs.com](https://smtpjs.com)
-
-#### 9. Frontend Build Failed
-
-**Error:** Next.js build failed
-
-**Solutions:**
-- Check for TypeScript errors
-- Verify all imports are correct
-- Check for missing dependencies
-- Clear .next cache: `rm -rf .next`
-- Try building again
-
-#### 10. Environment Variables Not Loading
-
-**Error:** Process.env undefined
-
-**Solutions:**
-- Verify .env file exists
-- Check .env file location (backend/ or frontend/)
-- Verify dotenv is called in code
-- Restart server after changing .env
-
-### Getting Help
-
-1. Check console logs for error details
-2. Review error messages carefully
-3. Check documentation in `/docs` folder
-4. Review AGENT.md for development rules
-5. Check GitHub issues (if public repository)
-
-### Debug Mode
-
-**Enable Database Logging:**
+**Solution:**
 ```bash
-# backend/.env
-DB_LOGGING=true
+# Linux/Mac
+sudo npm install
+
+# Or fix npm permissions
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+export PATH=~/.npm-global/bin:$PATH
 ```
 
-**Enable Verbose Logging:**
-```bash
-# Backend
-NODE_ENV=development npm run dev
+### Out of Memory
 
-# Frontend
-NODE_ENV=development npm run dev
+**Problem:** `JavaScript heap out of memory`
+
+**Solution:**
+```bash
+# Increase Node memory limit
+export NODE_OPTIONS="--max-old-space-size=4096"
+npm run build
 ```
 
 ---
 
-## Development Tips
+## Next Steps
 
-### Hot Reload
+After successful setup:
 
-**Backend:** Uses tsx watch for automatic hot reload on file changes
-
-**Frontend:** Next.js dev server provides hot reload
-
-### Database Schema Changes
-
-1. Always create a migration for schema changes
-2. Test migration on development database first
-3. Backup production database before running migrations
-4. Document breaking changes
-
-### API Testing
-
-Use Postman collection in `.postman/` folder or test with curl:
-
-```bash
-# Health check
-curl http://localhost:5000/api/v1/health
-
-# Login
-curl -X POST http://localhost:5000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@realestate.com","password":"admin123"}'
-```
-
-### Default Credentials
-
-After running seed:
-
-**Admin:**
-- Email: admin@realestate.com
-- Password: admin123
-- Access: /admin/login
-
-**Test User:**
-- Email: user@test.com
-- Password: user123
-- Access: /login
-
-**Change these passwords in production!**
-
----
-
-## Production Deployment Preparation
-
-### Before Deployment
-
-1. **Change Secrets:**
-   - Generate strong JWT_SECRET
-   - Use production database credentials
-   - Configure production SMTP
-
-2. **Build Applications:**
-   ```bash
-   npm run build  # Backend
-   cd frontend && npm run build  # Frontend
-   ```
-
-3. **Run Migrations:**
-   ```bash
-   cd backend
-   npm run migration:run
-   ```
-
-4. **Environment Variables:**
-   - Set NODE_ENV=production
-   - Configure production DATABASE_URL
-   - Set production FRONTEND_URL
-   - Configure production SMTP
-
-5. **Database Backup:**
-   - Backup production database
-   - Test backup restore process
-
-See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
+1. **Create Admin User:** Register an admin account via API or seed script
+2. **Configure Email:** Set up Brevo SMTP for password reset
+3. **Configure Supabase:** Set up Supabase Storage for media uploads
+4. **Set Up Sentry:** Configure error tracking (optional)
+5. **Test All Features:** Verify authentication, CRUD operations, etc.
+6. **Review Documentation:** Read other documentation files in `/docs`
 
 ---
 
 ## Additional Resources
 
-- [TypeORM Documentation](https://typeorm.io/)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Express.js Documentation](https://expressjs.com/)
+- [TypeORM Documentation](https://typeorm.io/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Neon Documentation](https://neon.tech/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Brevo SMTP Documentation](https://developers.brevo.com/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Sentry Documentation](https://docs.sentry.io/)

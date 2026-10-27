@@ -1,67 +1,194 @@
-# Architecture Documentation
+# Architecture
 
-**Last Updated:** October 22, 2026
-
----
-
-## Table of Contents
-1. [System Architecture](#system-architecture)
-2. [Backend Architecture](#backend-architecture)
-3. [Frontend Architecture](#frontend-architecture)
-4. [Database Architecture](#database-architecture)
-5. [Authentication Architecture](#authentication-architecture)
-6. [API Design Patterns](#api-design-patterns)
-7. [State Management](#state-management)
-8. [Component Architecture](#component-architecture)
-9. [Security Architecture](#security-architecture)
-10. [Performance Considerations](#performance-considerations)
+**Last Updated:** October 27, 2026
 
 ---
 
-## System Architecture
+## System Architecture Overview
+
+The Ingata Real Estate platform follows a monorepo architecture with separate frontend and backend applications. The system uses a REST API architecture with JWT-based authentication and a PostgreSQL database.
 
 ### High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         Client Layer                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │ Public Users │  │   Staff      │  │    Admin     │     │
-│  │  (Browser)   │  │  (Browser)   │  │  (Browser)   │     │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
-└─────────┼──────────────────┼──────────────────┼─────────────┘
-          │                  │                  │
-          └──────────────────┼──────────────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  Next.js 15     │
-                    │  Frontend       │
-                    │  (App Router)   │
-                    └────────┬────────┘
-                             │ HTTP/REST
-                    ┌────────▼────────┐
-                    │  Express.js     │
-                    │  Backend API    │
-                    │  (TypeScript)   │
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  TypeORM       │
-                    │  (PostgreSQL)  │
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  PostgreSQL     │
-                    │  (Neon Cloud)  │
-                    └─────────────────┘
+│                        Client Layer                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Browser    │  │   Browser    │  │   Browser    │      │
+│  │ (Admin)      │  │ (Agent/PM)   │  │ (Public)     │      │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
+└─────────┼─────────────────┼─────────────────┼───────────────┘
+          │                 │                 │
+          └─────────────────┼─────────────────┘
+                            │
+┌───────────────────────────┼───────────────────────────────────┐
+│                 Frontend Layer (Next.js 15)                    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  App Router Pages (New)                                  │  │
+│  │  - Home, Properties, Contact, Services, About            │  │
+│  │  - Portal (Login, Dashboard)                             │  │
+│  │  - Admin (Login, Dashboard)                              │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Legacy Pages (92 pages, migration in progress)          │  │
+│  │  - Property categories, Services, Legal, Tools            │  │
+│  │  - Admin sub-pages (37+ pages)                           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Components & Contexts                                   │  │
+│  │  - AuthContext, UI Components, Maps, Analytics            │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└───────────────────────────┼───────────────────────────────────┘
+                            │ HTTPS
+┌───────────────────────────┼───────────────────────────────────┐
+│              API Gateway (Express.js 4.21)                     │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Middleware Layer                                         │  │
+│  │  - CORS, Helmet, Rate Limiting, Auth, Authorization       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Route Layer (45 route files)                            │  │
+│  │  - Auth, Properties, Analytics, Admin, Portal            │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Controller Layer (35 controllers)                        │  │
+│  │  - Business logic, validation, data transformation        │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└───────────────────────────┼───────────────────────────────────┘
+                            │
+┌───────────────────────────┼───────────────────────────────────┐
+│              Data Layer (TypeORM + PostgreSQL)                │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Entities (30 entities)                                  │  │
+│  │  - Users, Properties, Inquiries, Analytics, etc.         │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  PostgreSQL Database (Render)                             │  │
+│  │  - 30 tables, indexes, foreign keys                      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+
+External Services:
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│  Brevo SMTP  │  │ Supabase     │  │ Sentry       │  │ Leaflet/OSM  │
+│  (Email)     │  │ (Storage)    │  │ (Error Track)│  │ (Maps)       │
+└──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
-### Architecture Pattern
-- **Pattern:** Monolithic with separated frontend/backend
-- **Communication:** REST API over HTTP
-- **Authentication:** JWT (stateless)
-- **Database:** Relational (PostgreSQL) with ORM
-- **Deployment:** Manual (no containerization currently)
+---
+
+## Frontend Architecture
+
+### Technology Stack
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** React Context (AuthContext)
+- **Routing:** Next.js App Router + Legacy page wrappers
+- **HTTP Client:** Custom API service layer
+- **Maps:** Leaflet + React Leaflet
+- **Icons:** Lucide React
+- **Fonts:** Inter (Google Fonts)
+
+### Directory Structure
+
+```
+frontend/
+├── app/                          # Next.js App Router
+│   ├── admin/                   # Admin pages
+│   │   ├── dashboard/           # Admin dashboard
+│   │   └── [...segments]        # Catch-all for legacy admin
+│   ├── portal/                  # Staff portal
+│   │   ├── login/               # Portal login
+│   │   ├── forgot-password/     # Password reset
+│   │   ├── reset-password/      # Password reset form
+│   │   ├── dashboard/           # Portal dashboard entry
+│   │   └── [...segments]        # Catch-all for portal workspace
+│   ├── properties/              # Property pages
+│   │   ├── [propertySlug]/      # Dynamic property details
+│   │   └── page.tsx             # Properties listing
+│   ├── services/                # Service pages
+│   ├── about/                   # About section
+│   ├── contact/                 # Contact page
+│   ├── faqs/                    # FAQ page
+│   ├── layout.tsx               # Root layout
+│   └── page.tsx                 # Homepage
+├── src/
+│   ├── components/              # React components
+│   │   ├── ui/                  # UI components (Button, Card, Input)
+│   │   ├── layout/              # Layout components (Header, Footer)
+│   │   ├── auth/                # Auth components (ProtectedRoute)
+│   │   ├── routing/             # Route handlers (LegacyPublicRoute)
+│   │   ├── portal/              # Portal components
+│   │   ├── property/            # Property-specific components
+│   │   ├── map/                 # Map components (Leaflet)
+│   │   ├── content/             # Content components
+│   │   ├── analytics/           # Analytics tracking
+│   │   └── consent/             # Cookie consent
+│   ├── context/                 # React contexts
+│   │   └── AuthContext.tsx      # Authentication state
+│   ├── legacy-pages/            # Legacy pages (92 files)
+│   │   ├── Admin/               # Admin legacy pages
+│   │   ├── Properties/          # Property legacy pages
+│   │   ├── Services/            # Service legacy pages
+│   │   └── ...                  # Other legacy pages
+│   ├── services/                # API services
+│   │   ├── api.ts               # Public API client
+│   │   ├── adminApi.ts          # Admin API client
+│   │   └── portalApi.ts         # Portal API client
+│   ├── hooks/                   # Custom hooks
+│   │   └── useInactivityLogout.ts
+│   ├── utils/                   # Utility functions
+│   │   ├── analytics.ts         # Analytics tracking
+│   │   ├── consent.ts           # Cookie consent
+│   │   ├── metadata.ts          # SEO metadata
+│   │   └── rwandaDistricts.ts   # Rwanda location data
+│   └── data/                    # Static data
+├── public/                      # Static assets
+└── package.json
+```
+
+### Component Architecture
+
+**Component Hierarchy:**
+```
+App Layout (SiteShell)
+├── Header
+│   ├── Navigation
+│   └── Mobile Menu
+├── Main Content
+│   ├── Page Components
+│   └── Feature Components
+└── Footer
+```
+
+**State Management:**
+- **AuthContext:** Global authentication state (user, token, isAuthenticated)
+- **localStorage:** Token persistence, user role, inactivity logout flag
+- **sessionStorage:** Analytics session ID
+- **Component State:** Local component state with useState/useReducer
+
+**Routing Strategy:**
+1. **App Router:** New pages using Next.js 13+ app directory
+2. **Legacy Routing:** Old pages served through catch-all routes
+3. **Route Handlers:** 
+   - `LegacyPublicRoute` - Maps legacy public routes
+   - `LegacyAdminRoute` - Maps legacy admin routes with auth
+   - `PortalWorkspace` - Handles portal role-based routing
+
+### API Integration Pattern
+
+**Three API Clients:**
+1. **api** - Public API (no authentication)
+2. **adminApi** - Admin API (JWT authentication)
+3. **portalApi** - Portal API (JWT authentication)
+
+**Request Flow:**
+```
+Component → API Service → fetch() → Backend API → Response
+                 ↓
+            Error Handling (401 → redirect, 403 → error)
+```
 
 ---
 
@@ -69,929 +196,390 @@
 
 ### Technology Stack
 - **Runtime:** Node.js
-- **Framework:** Express.js 4.21.2
-- **Language:** TypeScript 5.7.2
+- **Framework:** Express.js 4.21
+- **Language:** TypeScript
 - **ORM:** TypeORM 1.1.1
-- **Database Driver:** pg (PostgreSQL) 8.23.1
+- **Database:** PostgreSQL (Render)
+- **Authentication:** JWT (jsonwebtoken)
+- **Password Hashing:** bcryptjs
+- **Email:** Nodemailer + Brevo SMTP
+- **Media Storage:** Supabase Storage
+- **Error Tracking:** Sentry
+- **Scheduling:** node-cron
 
 ### Directory Structure
 
 ```
-backend/src/
-├── app.ts                    # Express app configuration
-├── server.ts                 # Server entry point
-├── data-source.ts            # TypeORM data source export
-├── controllers/              # Request handlers (33 files)
-│   ├── adminController.ts
-│   ├── adminPropertyController.ts
-│   ├── agentController.ts
-│   ├── authController.ts
-│   ├── propertyController.ts
-│   └── ...
-├── entities/                 # TypeORM entities (28 files)
-│   ├── User.ts
-│   ├── Role.ts
-│   ├── Property.ts
-│   ├── Agent.ts
-│   └── ...
-├── routes/                   # Express route definitions (45 files)
-│   ├── index.ts              # Route aggregator
-│   ├── authRoutes.ts
-│   ├── adminRoutes.ts
-│   ├── propertyRoutes.ts
-│   └── ...
-├── middleware/               # Express middleware
-│   ├── auth.ts               # JWT authentication
-│   ├── authorize.ts          # Role-based authorization
-│   ├── propertyManagerOwnership.ts  # Property ownership checks
-│   ├── errorHandler.ts       # Global error handler
-│   ├── rateLimiter.ts        # Rate limiting middleware
-│   ├── csrf.ts               # CSRF protection (disabled for JWT API)
-│   └── validation.ts         # Request validation
-├── lib/                      # Utilities and configuration
-│   ├── typeorm.ts            # TypeORM DataSource
-│   ├── TextIdSubscriber.ts   # Auto-generate text IDs
-│   └── passwordResetEmail.ts # Email utilities
-├── config/                   # Configuration
-│   ├── database.ts           # Database configuration
-│   └── env.ts                # Environment variables
-├── migrations/               # Database migrations (9 files)
-│   ├── 20261002000001-ResetDatabaseSchema.ts
-│   ├── 20261007000001-AddPasswordResetFields.ts
-│   └── ...
-├── scripts/                  # Utility scripts
-│   ├── runMigrations.ts      # Migration runner
-│   └── seedAdmin.ts          # Admin seeding
-├── services/                 # Background services
-│   └── scheduledTasks.ts     # Automated background jobs (analytics cleanup)
-├── types/                    # (Empty - types inline)
-├── seed.ts                   # Database seeding
-└── fix-schema.ts             # Schema fix script
+backend/
+├── src/
+│   ├── controllers/           # Request handlers (35 files)
+│   │   ├── authController.ts
+│   │   ├── propertyController.ts
+│   │   ├── adminController.ts
+│   │   └── ...
+│   ├── entities/              # TypeORM entities (30 files)
+│   │   ├── User.ts
+│   │   ├── Property.ts
+│   │   ├── Role.ts
+│   │   └── ...
+│   ├── routes/                # API routes (45 files)
+│   │   ├── authRoutes.ts
+│   │   ├── propertyRoutes.ts
+│   │   ├── adminRoutes.ts
+│   │   └── ...
+│   ├── middleware/            # Express middleware (7 files)
+│   │   ├── auth.ts            # JWT authentication
+│   │   ├── authorize.ts       # Role-based authorization
+│   │   ├── rateLimiter.ts     # Rate limiting
+│   │   ├── errorHandler.ts    # Global error handling
+│   │   ├── validation.ts      # Request validation
+│   │   ├── propertyManagerOwnership.ts
+│   │   └── csrf.ts            # CSRF protection (disabled)
+│   ├── migrations/            # Database migrations (9 files)
+│   │   ├── 20261002000001-ResetDatabaseSchema.ts
+│   │   └── ...
+│   ├── lib/                   # Utility libraries
+│   │   ├── typeorm.ts         # TypeORM configuration
+│   │   └── passwordResetEmail.ts
+│   ├── config/                # Configuration
+│   │   ├── env.ts             # Environment variables
+│   │   ├── database.ts        # Database configuration
+│   │   └── sentry.ts          # Sentry configuration
+│   ├── services/              # Background services
+│   │   └── scheduledTasks.ts  # Cron jobs
+│   ├── app.ts                 # Express app setup
+│   └── server.ts              # Server entry point
+├── database/
+│   └── migrations/            # SQL migrations
+├── render.yaml                # Render deployment config
+└── package.json
 ```
 
 ### Request Flow
 
 ```
-┌─────────────┐
-│   Client    │
-└──────┬──────┘
-       │ HTTP Request
-       ▼
-┌─────────────┐
-│  Express    │
-│  Middleware │
-└──────┬──────┘
-       │
-       ├─► CORS
-       ├─► JSON Parser
-       ├─► requireAuth (if protected)
-       ├─► authorize (if role-based)
-       └─► propertyManagerOwnership (if PM)
-       │
-       ▼
-┌─────────────┐
-│   Router    │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│ Controller  │
-└──────┬──────┘
-       │
-       ├─► Validate input
-       ├─► Business logic
-       ├─► TypeORM operations
-       └─► Response formatting
-       │
-       ▼
-┌─────────────┐
-│  Response   │
-└─────────────┘
+HTTP Request
+    ↓
+CORS Middleware
+    ↓
+Helmet (Security Headers)
+    ↓
+Rate Limiter
+    ↓
+Body Parser (express.json)
+    ↓
+Router (/api/v1)
+    ↓
+Route Handler
+    ↓
+requireAuth Middleware (if protected)
+    ↓
+authorize Middleware (if role-restricted)
+    ↓
+Controller
+    ↓
+TypeORM (Database)
+    ↓
+Response
+    ↓
+errorHandler (if error)
 ```
 
 ### Middleware Stack
 
-**Middleware Execution Order:**
-1. `cors()` - CORS headers
-2. `helmet()` - Security headers (CSP, HSTS, etc.)
-3. `express.json()` - JSON body parsing
-4. `generateCsrfToken` - CSRF token generation (disabled for JWT API)
-5. `csrfProtection` - CSRF token verification (disabled for JWT API)
-6. `apiRateLimiter` - Rate limiting for API routes
-7. `requireAuth` - JWT verification (for protected routes)
-8. `authorize(...roles)` - Role-based authorization (for role-restricted routes)
-9. `propertyManagerOwnership` - Property ownership checks (for PM routes)
-10. Route handler
-11. `errorHandler` - Global error handling
-
-### Controller Pattern
-
-Controllers follow a consistent pattern:
-
-```typescript
-export const controllerAction = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // 1. Extract and validate input
-    const { param1, param2 } = req.body;
-    
-    // 2. Business logic
-    const repository = AppDataSource.getRepository(Entity);
-    const result = await repository.findOne({ where: { id } });
-    
-    // 3. Return response
-    return res.json({ success: true, data: result });
-  } catch (error) {
-    // 4. Error handling
-    return next(error);
-  }
-};
-```
-
-### TypeORM Configuration
-
-**DataSource Setup:**
-```typescript
-export const AppDataSource = new DataSource({
-  type: 'postgres',
-  url: databaseUrl,
-  synchronize: false,  // Use migrations only
-  logging: databaseConfig.logging,
-  entities: [/* 28 entities */],
-  migrations: ['src/migrations/**/*.ts'],
-  subscribers: [TextIdSubscriber],
-});
-```
-
-**Text ID Subscriber:**
-- Automatically generates UUID for text primary columns
-- Triggers before entity insertion
-- Ensures all entities have unique text IDs
-
----
-
-## Frontend Architecture
-
-### Technology Stack
-- **Framework:** Next.js 15.0.0 (App Router)
-- **Language:** TypeScript 6.0.3
-- **Styling:** Tailwind CSS 3.4.19
-- **State Management:** React Context (AuthContext)
-- **HTTP Client:** Native fetch with custom API service layer
-- **Icons:** Lucide React 1.46.0
-- **Charts:** ApexCharts 8.1.0
-
-### Directory Structure
-
-```
-frontend/
-├── app/                      # Next.js App Router
-│   ├── layout.tsx           # Root layout
-│   ├── page.tsx             # Homepage
-│   ├── globals.css          # Global styles
-│   ├── admin/               # Admin dashboard routes
-│   │   ├── dashboard/
-│   │   ├── users/
-│   │   ├── properties/
-│   │   └── ...
-│   ├── portal/              # Staff portal routes
-│   │   ├── login/
-│   │   ├── dashboard/
-│   │   ├── forgot-password/
-│   │   └── reset-password/
-│   ├── properties/          # Property pages
-│   ├── agents/              # Agent pages
-│   ├── services/            # Service pages
-│   ├── about/               # About section
-│   ├── contact/             # Contact page
-│   └── faqs/                # FAQ page
-├── src/
-│   ├── components/          # React components
-│   │   ├── admin/           # Admin-specific components
-│   │   ├── analytics/       # Analytics components
-│   │   ├── auth/            # Protected route wrapper
-│   │   ├── content/         # Article/content components
-│   │   ├── layout/          # Header, Footer, AdminLayout
-│   │   ├── portal/          # Portal workspace & auth pages
-│   │   ├── property/        # Property components
-│   │   ├── shared/          # Shared UI components
-│   │   └── ui/              # Reusable UI components
-│   ├── context/             # React contexts
-│   │   └── AuthContext.tsx  # Authentication context
-│   ├── legacy-pages/        # Legacy pages (100+ files)
-│   │   ├── Admin/
-│   │   ├── Properties/
-│   │   ├── Agents/
-│   │   └── ...
-│   ├── services/            # API client
-│   │   └── api.ts           # API service layer
-│   ├── hooks/               # Custom React hooks
-│   ├── lib/                 # Utility functions
-│   ├── utils/               # Utility functions
-│   ├── data/                # Static data
-│   ├── navigation/          # Navigation configuration
-│   └── styles/              # Additional styles
-├── public/                  # Static assets
-├── next.config.js           # Next.js configuration
-├── tailwind.config.js       # Tailwind configuration
-├── tsconfig.json            # TypeScript configuration
-└── package.json
-```
-
-### App Router Migration Status
-
-**Current State:**
-- New App Router pages in `app/` directory
-- Legacy pages in `src/legacy-pages/` (100+ files)
-- Legacy routing wrappers preserve old URLs
-- Migration in progress
-
-**Migration Pattern:**
-```
-Legacy: src/legacy-pages/Admin/Properties/index.tsx
-New:    app/admin/properties/page.tsx
-```
-
-**Routing Wrappers:**
-- `LegacyAdminRoute` - Preserves admin URLs
-- `LegacyPublicRoute` - Preserves public URLs
-
-### Component Architecture
-
-**Component Hierarchy:**
-```
-RootLayout
-├── Providers (AuthContext, AnalyticsProvider)
-├── SiteShell
-│   ├── Header
-│   └── Footer
-└── Page Content
-    ├── AdminLayout (for admin routes)
-    │   ├── Sidebar
-    │   └── Content
-    └── PortalWorkspace (for staff portal)
-        ├── PortalAuthPages
-        └── Role-specific workspaces
-```
-
-### API Service Layer
-
-**Structure:**
-```typescript
-// api.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-
-// Public API
-export const api = {
-  getProperties: (query?) => request(`/properties${buildQuery(query)}`),
-  getProperty: (slug) => request(`/properties/${slug}`),
-  // ... other public endpoints
-};
-
-// Admin API (authenticated)
-export const adminApi = {
-  login: (email, password) => request('/auth/admin/login', { method: 'POST', ... }),
-  getProperties: (query?) => authRequest(`/admin/properties${buildQuery(query)}`),
-  // ... other admin endpoints
-};
-
-// Portal API (authenticated staff)
-export const portalApi = {
-  getAgentProperties: () => authRequest('/agent-dashboard/my-properties'),
-  getManagedProperties: (query?) => authRequest(`/property-manager${buildQuery(query)}`),
-  // ... other staff endpoints
-};
-```
-
-**Request Pattern:**
-```typescript
-const request = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.message);
-  return body;
-};
-
-const authRequest = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
-  const token = getToken();
-  return request<T>(path, {
-    ...options,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
-};
-```
-
-### State Management
-
-**AuthContext:**
-```typescript
-interface AuthContextValue {
-  user: AdminUser | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email, password) => Promise<void>;
-  userLogin: (email, password) => Promise<AdminUser>;
-  userRegister: (name, email, password) => Promise<void>;
-  updateProfile: (name, phone) => Promise<void>;
-  logout: () => void;
-}
-```
-
-**State Storage:**
-- Token: localStorage (`admin_token` key)
-- User State: React Context
-- Session Restoration: On mount, verify token with `/auth/me`
-
-**Analytics Provider:**
-- Tracks page views, property views, click events
-- Session-based tracking
-- Device detection
-- UTM parameter capture
-
----
-
-## Database Architecture
-
-### Database: PostgreSQL (Neon)
-
-**Connection Strategy:**
-- App: Pooled connection (Neon pooler)
-- Migrations: Direct connection (auto-converted from pooled)
-
-### Entity Relationships
-
-```mermaid
-erDiagram
-    ROLE ||--o{ USER : "has"
-    USER ||--o| AGENT : "has profile"
-    USER ||--o{ ARTICLE : "writes"
-    USER ||--o{ CONTACT_MESSAGE : "sends"
-    USER ||--o{ FAVORITE : "saves"
-    USER ||--o{ INQUIRY : "submits"
-    USER ||--o{ LISTING_REQUEST : "submits"
-    USER ||--o{ VALUATION_REQUEST : "submits"
-    USER ||--o{ VIEWING_REQUEST : "submits"
-    USER ||--o{ PROPERTY_SEARCH : "saves"
-    
-    AGENT ||--o{ PROPERTY : "manages"
-    AGENT ||--o{ INQUIRY : "receives"
-    AGENT ||--o{ VIEWING_REQUEST : "schedules"
-    
-    PROPERTY ||--o{ PROPERTY_IMAGE : "has"
-    PROPERTY ||--o{ PROPERTY_FEATURE_LINK : "has features"
-    PROPERTY }o--|| PROPERTY_CATEGORY : "belongs to"
-    PROPERTY }o--|| DEVELOPMENT : "part of"
-    PROPERTY ||--o{ INQUIRY : "receives"
-    PROPERTY ||--o{ VIEWING_REQUEST : "receives"
-    PROPERTY ||--o{ FAVORITE : "saved by"
-    PROPERTY ||--o{ PROPERTY_VIEW : "viewed"
-    PROPERTY ||--o{ CLICK_EVENT : "interacted with"
-    
-    ARTICLE_CATEGORY ||--o{ ARTICLE : "categorizes"
-    
-    SERVICE ||--o{ SERVICE_REQUEST : "receives"
-    
-    SITE_SETTING ||--o{ SITE_SETTING : "singleton"
-```
-
-### Database Indexes
-
-**Performance Indexes:**
-```sql
--- Properties
-CREATE INDEX idx_properties_status ON properties(status);
-CREATE INDEX idx_properties_publication_status ON properties(publication_status);
-CREATE INDEX idx_properties_agent_id ON properties(agent_id);
-CREATE INDEX idx_properties_category_id ON properties(category_id);
-CREATE INDEX idx_properties_slug ON properties(slug);
-
--- Inquiries
-CREATE INDEX idx_inquiries_status ON inquiries(status);
-CREATE INDEX idx_inquiries_property_id ON inquiries(property_id);
-
--- Viewings
-CREATE INDEX idx_viewing_requests_status ON viewing_requests(status);
-CREATE INDEX idx_viewing_requests_property_id ON viewing_requests(property_id);
-
--- Property Searches
-CREATE INDEX idx_property_searches_user_id ON property_searches(user_id);
-
--- Analytics
-CREATE INDEX idx_page_views_user_id ON page_views(user_id);
-CREATE INDEX idx_page_views_page_path ON page_views(page_path);
-CREATE INDEX idx_page_views_created_at ON page_views(created_at);
-CREATE INDEX idx_page_views_created_at_cleanup ON page_views(created_at);
-
-CREATE INDEX idx_property_views_user_id ON property_views(user_id);
-CREATE INDEX idx_property_views_property_id ON property_views(property_id);
-CREATE INDEX idx_property_views_created_at ON property_views(created_at);
-CREATE INDEX idx_property_views_created_at_cleanup ON property_views(created_at);
-
-CREATE INDEX idx_click_events_user_id ON click_events(user_id);
-CREATE INDEX idx_click_events_event_type ON click_events(event_type);
-CREATE INDEX idx_click_events_property_id ON click_events(property_id);
-CREATE INDEX idx_click_events_created_at ON click_events(created_at);
-CREATE INDEX idx_click_events_created_at_cleanup ON click_events(created_at);
-```
-
-### Migration Strategy
-
-**Migration Execution:**
-```bash
-npm run migration:run
-```
-
-**Migration Runner:** `src/scripts/runMigrations.ts`
-- Loads migrations from `src/migrations/`
-- Uses direct database connection
-- Tracks executed migrations
-- Supports rollback (down() methods)
-
-**Migration Pattern:**
-```typescript
-export class MigrationName implements MigrationInterface {
-  name = 'MigrationNameTimestamp';
-
-  async up(queryRunner: QueryRunner): Promise<void> {
-    // Create tables, add columns, create indexes
-  }
-
-  async down(queryRunner: QueryRunner): Promise<void> {
-    // Reverse changes
-  }
-}
-```
-
----
-
-## Authentication Architecture
-
-### JWT-Based Authentication
-
-**Token Structure:**
-```typescript
-{
-  id: string;      // User ID
-  email: string;   // User email
-  role: string;    // User role
-  iat: number;     // Issued at
-  exp: number;     // Expiration
-}
-```
-
-**Token Lifecycle:**
-1. **Generation:** On successful login, server signs JWT with `JWT_SECRET`
-2. **Storage:** Client stores in localStorage (`admin_token`)
-3. **Transmission:** Client sends in `Authorization: Bearer <token>` header
-4. **Verification:** Middleware verifies signature and expiration
-5. **Expiration:** 5 minutes (configurable via `JWT_EXPIRES_IN`, default changed from 7d to 5m)
-6. **Revocation:** Stateless - client simply discards token
-7. **Inactivity Logout:** Frontend auto-logout after 5 minutes of inactivity
-
-### Authentication Middleware
-
-**requireAuth:**
-```typescript
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Authentication required' });
-  }
-  const token = authHeader.replace('Bearer ', '').trim();
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = { id: decoded.id, role: decoded.role };
-    return next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
-  }
-};
-```
-
-### Authorization Middleware
-
-**authorize:**
-```typescript
-export const authorize = (...allowedRoles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as { role?: string };
-    if (!user || !user.role) {
-      return res.status(401).json({ message: 'User not authenticated' });
-    }
-    if (!allowedRoles.map(r => r.toLowerCase()).includes(user.role.toLowerCase())) {
-      return res.status(403).json({ message: 'Forbidden: insufficient permissions' });
-    }
-    return next();
-  };
-};
-```
-
-### Property Manager Ownership
-
-**Ownership Middleware:**
-```typescript
-export const requireOwnedManagerProperty: RequestHandler = async (req, res, next) => {
-  if (isAdmin(req.user?.role)) return next();
-  if (!isManager(req.user?.role) || !req.user?.id) {
-    return res.status(403).json({ message: 'Forbidden' });
-  }
-  const property = await AppDataSource.getRepository(Property).findOne({
-    where: { id: String(req.params.id), propertyManagerId: req.user.id },
-  });
-  return property ? next() : res.status(404).json({ message: 'Not found' });
-};
-```
-
----
-
-## API Design Patterns
-
-### RESTful Conventions
-
-**URL Structure:**
-```
-/api/v1/{resource}              # List
-/api/v1/{resource}/{id}         # Get single
-/api/v1/{resource}              # POST create
-/api/v1/{resource}/{id}         # PATCH update
-/api/v1/{resource}/{id}         # DELETE delete
-```
-
-**Response Format:**
-```typescript
-// Success
-{
-  success: true,
-  data: { /* response data */ },
-  pagination?: { page, limit, total, totalPages }
-}
-
-// Error
-{
-  success: false,
-  message: "Error description"
-}
-```
-
-### Route Organization
-
-**Route Aggregator:**
-```typescript
-// routes/index.ts
-router.use('/auth', authRoutes);
-router.use('/properties', propertyRoutes);
-router.use('/admin', adminRoutes);
-router.use('/agent-dashboard', agentDashboardRoutes);
-router.use('/property-manager', propertyManagerRoutes);
-router.use('/content-editor', contentEditorRoutes);
-router.use('/analytics', analyticsRoutes);
-```
-
-**Route Middleware Application:**
-```typescript
-// Admin routes - all require admin role
-router.use(requireAuth, authorize('admin'));
-
-// Local middleware
-router.get('/dashboard', getDashboard);
-router.patch('/users/:id', updateUser);
-```
-
-### Error Handling
-
-**Global Error Handler:**
-```typescript
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err);
-  res.status(500).json({
-    success: false,
-    message: 'Internal server error'
-  });
-};
-```
-
-**Controller Error Handling:**
-```typescript
-export const controllerAction = async (req, res, next) => {
-  try {
-    // ... logic
-  } catch (error) {
-    return next(error);  // Pass to global handler
-  }
-};
-```
-
----
-
-## State Management
-
-### Client-Side State
-
-**AuthContext:**
-- User authentication state
-- Token management
-- Login/logout functions
-- Profile updates
-
-**AnalyticsProvider:**
-- Session tracking
-- Page view tracking
-- Property view tracking
-- Click event tracking
-
-**Component State:**
-- Local component state with React hooks
-- Form state with controlled components
-- Loading states with boolean flags
-
-### Server-Side State
-
-**Database State:**
-- Persistent in PostgreSQL
-- TypeORM entities as data models
-- Repository pattern for data access
-
-**Session State:**
-- Stateless JWT authentication
-- No server-side session storage
-- Token-based session validation
-
----
-
-## Component Architecture
-
-### Component Categories
-
-**Layout Components:**
-- `SiteShell` - Main layout wrapper
-- `Header` - Site navigation
-- `Footer` - Site footer
-- `AdminLayout` - Admin dashboard layout
-- `PortalWorkspace` - Staff portal layout
-
-**UI Components:**
-- `Button` - Reusable button
-- `Card` - Card container
-- `Input` - Form input
-- `PropertyCard` - Property listing card
-- `CategoryCard` - Category card
-- `StatusBadge` - Status indicator
-
-**Feature Components:**
-- `AdminDashboard` - Admin dashboard
-- `AnalyticsSummaryCards` - Analytics cards
-- `PropertyGallery` - Image gallery
-- `ImageViewer` - Image viewer
-- `PropertyForm` - Property creation/edit form
-
-**Auth Components:**
-- `ProtectedRoute` - Route protection wrapper
-- `PortalAuthPages` - Portal auth pages
-- `PortalWorkspace` - Staff workspace
-
-### Component Patterns
-
-**Presentational Components:**
-- Receive props, render UI
-- No side effects
-- Reusable across contexts
-
-**Container Components:**
-- Fetch data, manage state
-- Pass data to presentational components
-- Handle business logic
-
-**Higher-Order Components:**
-- `ProtectedRoute` - Wraps protected routes
-- `withAuth` - (not implemented, could be added)
+1. **CORS:** Cross-origin resource sharing
+2. **Helmet:** Security headers (CSP, HSTS, etc.)
+3. **Rate Limiting:** Prevent abuse (4 limiters)
+4. **Body Parser:** Parse JSON request bodies
+5. **Authentication:** JWT token verification
+6. **Authorization:** Role-based access control
+7. **Validation:** Request validation
+8. **Error Handler:** Global error handling
+
+### Database Layer
+
+**TypeORM Configuration:**
+- Connection pooling (DATABASE_URL)
+- Direct connection for migrations (DATABASE_URL_UNPOOLED)
+- SSL enabled for production
+- Query logging in development
+- Subscriber for text ID generation
+
+**Entity Relationships:**
+- Many-to-one: Property → Agent, Property → Category
+- One-to-many: User → Property, User → Inquiry
+- Many-to-many: Property ↔ Feature (junction table)
+- Cascade deletes for child entities
+- SET NULL for analytics on user deletion
 
 ---
 
 ## Security Architecture
 
-### Authentication Security
+### Authentication
+- **JWT Tokens:** Stateless authentication
+- **Token Expiration:** 5 minutes (configurable)
+- **Password Hashing:** bcrypt with 12 rounds
+- **Password Reset:** SHA-256 hashed tokens, 30-minute expiration
+- **Account Deactivation:** `is_active` flag
 
-**Password Security:**
-- Hashed with bcryptjs (12 salt rounds)
-- Never stored in plain text
-- Reset tokens SHA-256 hashed
-- Single-use reset tokens
+### Authorization
+- **Role-Based Access Control (RBAC):** 5 roles
+- **Case-Insensitive Role Comparison:** Normalized role names
+- **Ownership Checks:** Property managers can only access their properties
+- **Agent Assignment:** Agents can only access assigned properties
+- **Special Permissions:** `can_upload_property_media` flag
 
-**Token Security:**
-- JWT signed with HS256
-- Secret key in environment variable
-- 7-day expiration
-- Transmission via HTTPS in production
+### Rate Limiting
+- **API Rate Limiter:** 100 requests/15 minutes
+- **Auth Rate Limiter:** 5 requests/15 minutes
+- **Contact Rate Limiter:** 3 requests/hour
+- **Search Rate Limiter:** 30 requests/minute
 
-### Authorization Security
+### HTTP Security
+- **CORS:** Configured allowed origins
+- **Helmet:** Security headers (CSP, HSTS, X-Frame-Options)
+- **Content Security Policy:** Allows Leaflet resources
+- **Cross-Origin Embedder Policy:** Disabled for Leaflet maps
 
-**Role-Based Access:**
-- Middleware enforces role requirements
-- Case-insensitive role comparison
-- Admin bypass for ownership checks
-- Property manager ownership enforcement
+### Input Validation
+- **Validation Middleware:** Generic validator factory
+- **Email Validation:** Regex validation for password reset
+- **Password Length:** 8-128 characters
+- **Token Format:** 64 hex characters for reset tokens
 
-**Input Validation:**
-- Type checking in controllers
-- Length validation (passwords, emails)
-- Format validation (email regex)
-- SQL injection prevention via TypeORM
-
-### Data Security
-
-**Database Security:**
-- Parameterized queries via TypeORM
-- Foreign key constraints
-- Cascade deletes where appropriate
-- No exposed credentials in code
-
-**API Security:**
-- CORS configured
-- Rate limiting (not implemented - TODO)
-- CSRF protection (not implemented - TODO)
-- Input sanitization
+### Error Handling
+- **Global Error Handler:** Catches all errors
+- **Sentry Integration:** Error tracking with sensitive header filtering
+- **Production vs Development:** Generic vs detailed error messages
 
 ---
 
-## Performance Considerations
+## Data Flow Architecture
 
-### Database Performance
+### Property Listing Flow
+```
+User (Property Manager/Admin)
+    ↓
+Create Property Form
+    ↓
+POST /api/v1/admin/properties
+    ↓
+adminPropertyController.createAdminProperty
+    ↓
+TypeORM: Insert into properties table
+    ↓
+Property Manager Ownership Middleware (auto-assign)
+    ↓
+Upload Media (Supabase Storage)
+    ↓
+Update property_images table
+    ↓
+Response: Property created
+```
 
-**Indexing:**
-- Strategic indexes on frequently queried fields
-- Composite indexes for common query patterns
-- Cleanup indexes for analytics data
+### Inquiry Flow
+```
+User (Public)
+    ↓
+Property Inquiry Form
+    ↓
+POST /api/v1/inquiries
+    ↓
+inquiryController.createInquiry
+    ↓
+Rate Limiter Check (3 req/hour)
+    ↓
+TypeORM: Insert into inquiries table
+    ↓
+Assign to Property Agent (if exists)
+    ↓
+Create Agent Inquiry Note (empty)
+    ↓
+Response: Inquiry created
+    ↓
+Agent Dashboard: View inquiry
+    ↓
+Agent adds notes, sets follow-up date
+```
 
-**Query Optimization:**
-- TypeORM query builder for complex queries
-- Eager loading with relations
-- Pagination for large datasets
-- N+1 query prevention (some cases may exist)
-
-### Frontend Performance
-
-**Code Splitting:**
-- Next.js automatic code splitting
-- Route-based chunking
-- Dynamic imports for large components
-
-**Image Optimization:**
-- Next.js Image component
-- Lazy loading
-- Responsive images
-- CDN for static assets (TODO: configure production domains)
-
-**Caching:**
-- No caching layer currently (TODO: add Redis)
-- Browser caching via HTTP headers
-- Static asset caching
-
-### API Performance
-
-**Response Time:**
-- Efficient database queries
-- Minimal data transfer
-- Pagination for large responses
-- Compression (not implemented - TODO)
-
-**Scalability:**
-- Stateless API design
-- Database connection pooling
-- Horizontal scaling ready (with load balancer)
-
----
-
-## Known Architectural Issues
-
-### Current Issues
-
-1. **No Caching Layer:**
-   - No Redis or in-memory cache
-   - Database queried on every request
-   - Impact: Higher database load
-
-2. **No Rate Limiting:**
-   - No API rate limiting
-   - Vulnerable to abuse
-   - Impact: Potential DoS attacks
-
-3. **No CSRF Protection:**
-   - No CSRF tokens
-   - Vulnerable to CSRF attacks
-   - Impact: Security risk
-
-4. **N+1 Query Potential:**
-   - Some controllers may have N+1 queries
-   - Example: Agent property counting
-   - Impact: Performance degradation
-
-5. **Media Upload Storage:**
-   - Multer configured but no storage provider
-   - Files may not persist
-   - Impact: Feature non-functional
-
-6. **Supabase Dependencies:**
-   - Unused Supabase libraries
-   - Bloat in dependencies
-   - Impact: Larger bundle size
-
-### Recommended Improvements
-
-1. **Add Redis Cache:**
-   - Cache frequently accessed data
-   - Cache API responses
-   - Reduce database load
-
-2. **Implement Rate Limiting:**
-   - Use express-rate-limit
-   - Per-IP and per-user limits
-   - Protect against abuse
-
-3. **Add CSRF Protection:**
-   - Use csurf or similar
-   - CSRF tokens for state-changing requests
-   - Enhance security
-
-4. **Optimize Queries:**
-   - Review all N+1 queries
-   - Use eager loading
-   - Add query batching
-
-5. **Implement Media Storage:**
-   - Integrate S3 or Cloudinary
-   - Configure Multer storage
-   - Enable file uploads
-
-6. **Remove Unused Dependencies:**
-   - Remove Supabase libraries
-   - Audit all dependencies
-   - Reduce bundle size
+### Analytics Tracking Flow
+```
+User (Public/Authenticated)
+    ↓
+Page Load / Property View / Click
+    ↓
+Frontend: analytics.ts utilities
+    ↓
+POST /api/v1/analytics/page-view
+POST /api/v1/analytics/property-view
+POST /api/v1/analytics/click-event
+    ↓
+analyticsController.track*
+    ↓
+TypeORM: Insert into analytics tables
+    ↓
+Async processing (no response delay)
+    ↓
+Scheduled Task: Daily cleanup at 2:00 AM UTC
+    ↓
+Delete records older than retention period
+```
 
 ---
 
-## Architecture Decision Records
+## Deployment Architecture
+
+### Frontend Deployment (Vercel)
+- **Platform:** Vercel
+- **Build:** Next.js build (TypeScript compilation)
+- **Environment Variables:** NEXT_PUBLIC_API_URL, NEXT_PUBLIC_BASE_URL
+- **Domain:** ingata-real-estate.vercel.app
+- **Automatic Deployment:** Git push triggers build
+
+### Backend Deployment (Render)
+- **Platform:** Render.com
+- **Build:** TypeScript compilation (`npm run build`)
+- **Runtime:** Node.js
+- **Database:** Render PostgreSQL (free tier)
+- **Environment Variables:** DATABASE_URL, JWT_SECRET, SMTP config, etc.
+- **Domain:** ingata-backend.onrender.com
+- **Automatic Deployment:** Git push triggers build
+- **Migrations:** Manual execution via Render Shell
+
+### Infrastructure as Code
+- **render.yaml:** Defines backend service and database
+- **Blueprint Deployment:** One-click deployment from render.yaml
+- **Environment Variables:** Configured in render.yaml (some sync: false)
+
+---
+
+## Scalability Considerations
+
+### Current Limitations
+- **No Caching:** All queries hit primary database
+- **No Read Replicas:** Single database instance
+- **No Connection Pooling Config:** Uses TypeORM defaults
+- **No Load Balancing:** Single Render instance
+- **No CDN for API:** Direct API calls
+
+### Future Scalability Options
+- **Redis Caching:** Cache frequently accessed data (properties, categories)
+- **Database Read Replicas:** Distribute read load
+- **Connection Pooling:** Configure TypeORM pool size
+- **Horizontal Scaling:** Multiple backend instances with load balancer
+- **CDN for Static Assets:** Use CloudFront or similar
+- **API Rate Limiting:** More sophisticated rate limiting per user
+
+---
+
+## Monitoring and Observability
+
+### Current Implementation
+- **Sentry:** Error tracking and logging
+- **Console Logging:** Development logging
+- **Analytics:** Custom page view and click tracking
+- **Health Check:** `/api/v1/health` endpoint
+
+### Recommended Additions
+- **APM:** Application Performance Monitoring (e.g., New Relic, Datadog)
+- **Metrics:** Prometheus metrics for request latency, error rates
+- **Logs:** Centralized logging (e.g., LogRocket, Papertrail)
+- **Uptime Monitoring:** External uptime monitoring (e.g., UptimeRobot)
+- **Database Monitoring:** Query performance monitoring
+
+---
+
+## Technology Rationale
+
+### Why Next.js 15?
+- App Router for better routing and server components
+- Built-in optimization (image, font, script)
+- Excellent TypeScript support
+- Strong community and documentation
+
+### Why Express.js?
+- Mature and stable framework
+- Extensive middleware ecosystem
+- Simple and flexible
+- Good performance for REST APIs
 
 ### Why TypeORM?
-- TypeScript integration
-- Active development
-- Good PostgreSQL support
-- Migration system
-- Entity relationships
-
-### Why Next.js App Router?
-- Modern React framework
-- Server-side rendering
-- File-based routing
-- Built-in optimization
+- TypeScript-first ORM
+- Active Record and Data Mapper patterns
+- Good migration system
 - Active community
 
-### Why JWT Authentication?
-- Stateless architecture
-- Scalable
-- No server-side session storage
-- Easy integration with mobile apps
-- Industry standard
-
 ### Why PostgreSQL?
+- Robust relational database
+- Excellent JSON support
 - ACID compliance
-- Complex query support
-- JSONB support
-- Full-text search
-- Neon cloud hosting
+- Strong ecosystem
 
-### Why Tailwind CSS?
-- Utility-first approach
-- Consistent design system
-- Small bundle size
-- Easy customization
-- Industry adoption
+### Why JWT?
+- Stateless authentication
+- Easy to implement
+- Widely supported
+- Good for REST APIs
+
+### Why Leaflet?
+- Open-source and free
+- No API key required
+- Lightweight
+- Good performance
+
+### Why Supabase Storage?
+- Easy file upload API
+- Generous free tier
+- Good documentation
+- Built-in CDN
 
 ---
 
-## Future Architecture Plans
+## Design Patterns
 
-See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for detailed future plans.
+### Repository Pattern
+- TypeORM entities act as repositories
+- `AppDataSource.getRepository(Entity)` for data access
+- Encapsulates database operations
+
+### Middleware Pattern
+- Express middleware for cross-cutting concerns
+- Auth, authorization, rate limiting, error handling
+- Reusable across routes
+
+### Factory Pattern
+- Validation middleware factory
+- Creates validation middleware from validator functions
+
+### Context Pattern (Frontend)
+- React Context for global state
+- AuthContext for authentication state
+- Avoids prop drilling
+
+### Service Layer Pattern
+- Controllers handle HTTP concerns
+- Business logic in controllers (could be extracted to services)
+- Database operations via TypeORM
+
+---
+
+## Future Architecture Improvements
 
 ### Short Term
-- Add caching layer (Redis)
-- Implement rate limiting
-- Add CSRF protection
-- Complete media storage implementation
-- Optimize database queries
+1. **Refresh Token Implementation:** Reduce frequent re-authentication
+2. **API Documentation:** Implement Swagger/OpenAPI
+3. **Caching Layer:** Add Redis for frequently accessed data
+4. **Backend Tests:** Fix Jest ESM configuration and add tests
 
 ### Medium Term
-- Add automated testing
-- Implement CI/CD pipeline
-- Add Docker configuration
-- Enhance monitoring and logging
-- Add error tracking (Sentry)
+1. **Microservices:** Consider splitting into separate services
+2. **Event-Driven Architecture:** Implement message queue for async tasks
+3. **GraphQL:** Consider GraphQL for flexible data fetching
+4. **Real-time Features:** WebSocket for live updates
 
 ### Long Term
-- Consider microservices architecture
-- Add message queue (RabbitMQ/Redis)
-- Implement event sourcing
-- Add real-time features (WebSocket)
-- GraphQL API alternative
+1. **Multi-Tenancy:** Support multiple real estate agencies
+2. **Mobile App:** React Native or Flutter mobile application
+3. **AI Integration:** Property valuation predictions, recommendations
+4. **Advanced Analytics:** Machine learning for market insights

@@ -1,986 +1,490 @@
 # Development Roadmap
 
-**Last Updated:** October 22, 2026
-
----
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Completed Features](#completed-features)
-3. [In Progress](#in-progress)
-4. [Short Term Priorities](#short-term-priorities)
-5. [Medium Term Goals](#medium-term-goals)
-6. [Long Term Vision](#long-term-vision)
-7. [Technical Debt](#technical-debt)
-8. [Deprecation Timeline](#deprecation-timeline)
+**Last Updated:** October 27, 2026
 
 ---
 
 ## Overview
 
-### Project Status
-
-**Version:** 1.0.0  
-**Status:** Production Deployed (Vercel Frontend + Render Backend)  
-**Completion:** ~95% core features, ~5% enhancements
-
-### Development Philosophy
-
-**Priority Order:**
-1. Stability and reliability
-2. Security
-3. Core functionality
-4. User experience
-5. Performance
-6. Advanced features
-
-**Decision Criteria:**
-- Business value
-- User impact
-- Development effort
-- Risk assessment
-- Resource availability
+This document outlines the development roadmap for the Ingata Real Estate platform. It includes completed features, current priorities, and future enhancements.
 
 ---
 
-## Completed Features
+## Completed Features ✅
 
-### Core Functionality ✅
+### Version 1.0.0 (October 2026)
 
-- [x] User authentication (JWT)
-- [x] User registration
-- [x] Password reset via email
-- [x] Role-based authorization
-- [x] Admin dashboard
-- [x] Agent dashboard
-- [x] Property manager dashboard
-- [x] Content editor dashboard
-- [x] Property listing management
-- [x] Property search (basic)
-- [x] Property categories
-- [x] Property images
-- [x] Property features (database + UI)
-- [x] Agent profiles
-- [x] Inquiries management
-- [x] Viewing requests
-- [x] Listing requests
-- [x] Valuation requests
-- [x] Contact messages
-- [x] Articles/insights
-- [x] FAQs
-- [x] Services
-- [x] Testimonials
-- [x] Site settings
-- [x] Site pages CMS
-- [x] Analytics tracking
-- [x] Analytics dashboard
-- [x] Favorites
-- [x] Property searches
-- [x] Interactive property maps (Leaflet + OpenStreetMap)
-- [x] Property comparison tool
-- [x] Mortgage calculator
-- [x] Rental yield calculator
-- [x] Advanced search with map view
-- [x] Image optimization with production domains
+**Core Platform:**
+- ✅ User authentication (JWT)
+- ✅ Multi-role system (5 roles)
+- ✅ Property listing management
+- ✅ Property search with filters
+- ✅ Advanced search with map view
+- ✅ Property categories
+- ✅ Property features
+- ✅ Developments
+- ✅ Media upload (Supabase)
 
-### Security Features ✅
+**User Interactions:**
+- ✅ Property inquiries
+- ✅ Viewing requests
+- ✅ Valuation requests
+- ✅ Listing requests
+- ✅ Contact forms
+- ✅ Favorites
+- ✅ Property searches
+- ✅ Property comparison
+- ✅ Mortgage calculator
+- ✅ Rental yield calculator
 
-- [x] JWT authentication with 5-minute expiration
-- [x] Password hashing (bcrypt, 12 salt rounds)
-- [x] Role-based authorization
-- [x] Rate limiting (API, auth, contact, search)
-- [x] Security headers (Helmet middleware)
-- [x] Content Security Policy
-- [x] CSRF protection middleware (disabled for JWT API)
-- [x] Error tracking (Sentry integration)
-- [x] Inactivity logout (5 minutes)
-- [x] Scheduled analytics data cleanup (node-cron)
-- [x] CI/CD pipeline (Vercel + Render auto-deploy)
+**Content Management:**
+- ✅ Articles with categories
+- ✅ FAQs
+- ✅ Testimonials
+- ✅ Services
+- ✅ Site pages
+- ✅ Homepage content management
 
-### Database Schema ✅
+**Analytics:**
+- ✅ Page view tracking
+- ✅ Property view tracking
+- ✅ Click event tracking
+- ✅ Analytics dashboard
+- ✅ Data retention management
+- ✅ Automated data cleanup
 
-- [x] 28 database tables
-- [x] 8 migrations
-- [x] Foreign key relationships
-- [x] Performance indexes
-- [x] Data retention policy field
+**Security:**
+- ✅ JWT authentication
+- ✅ Password hashing (bcrypt)
+- ✅ Rate limiting
+- ✅ CORS configuration
+- ✅ Security headers (Helmet)
+- ✅ Role-based authorization
+- ✅ Password reset (email)
 
-### API Endpoints ✅
+**Infrastructure:**
+- ✅ Backend deployment (Render)
+- ✅ Frontend deployment (Vercel)
+- ✅ Database (PostgreSQL)
+- ✅ Email service (Brevo)
+- ✅ Media storage (Supabase)
+- ✅ Error tracking (Sentry)
+- ✅ CI/CD (auto-deploy)
 
-- [x] 40+ API routes
-- [x] Public endpoints
-- [x] Admin endpoints
-- [x] Agent dashboard endpoints
-- [x] Property manager endpoints
-- [x] Content editor endpoints
-- [x] Analytics endpoints
-
-### Frontend Pages ✅
-
-- [x] Homepage
-- [x] Property listings
-- [x] Property details
-- [x] Agent directory
-- [x] Agent profiles
-- [x] Contact form
-- [x] About section
-- [x] Services page
-- [x] Articles/insights
-- [x] FAQs
-- [x] Admin dashboard
-- [x] Staff portal login
-- [x] User registration
-- [x] User login
-- [x] Password reset flow
+**Frontend:**
+- ✅ Next.js 15 with App Router
+- ✅ Tailwind CSS styling
+- ✅ Responsive design
+- ✅ Interactive maps (Leaflet)
+- ✅ SEO optimization
+- ✅ Cookie consent management
+- ✅ Inactivity logout
 
 ---
 
-## In Progress
+## Current Priorities 🎯
 
-### Frontend Migration to App Router 🔄
+### High Priority (Immediate)
 
-**Status:** In Progress  
-**Completion:** ~30%  
-**Priority:** High
-
-**Description:**
-- Migrating from legacy pages to Next.js App Router
-- 100+ legacy pages in `src/legacy-pages/`
-- Legacy routing wrappers preserve old URLs
-- New pages in `app/` directory
-
-**Remaining Work:**
-- Migrate all legacy pages to App Router
-- Remove legacy routing wrappers
-- Clean up legacy page files
-- Update navigation to use new routes
-- Test all routes
-
-**Blocked By:**
-- Time/resources
-- Priority of other features
-
-**Estimated Completion:** Q4 2026
-
----
-
-## Short Term Priorities
-
-### Phase 1: Critical Infrastructure (1-2 weeks)
-
-#### 1.1 Media Upload Storage Implementation
-
-**Status:** ❌ Not Started  
-**Priority:** High  
-**Effort:** 3-5 days
-
-**Description:**
-- Implement S3, Cloudinary, or local storage
-- Configure Multer storage
-- Test upload functionality
-- Add error handling
+#### 1. Fix Backend Test Configuration
+**Status:** ⚠️ Broken  
+**Effort:** 1-2 hours  
+**Description:** Configure Jest to handle ESM modules and enable backend testing
 
 **Tasks:**
-- [ ] Choose storage provider
-- [ ] Configure storage credentials
-- [ ] Implement Multer storage configuration
-- [ ] Update upload endpoints
-- [ ] Test file upload
-- [ ] Test file retrieval
-- [ ] Add file size limits
-- [ ] Add file type validation
-- [ ] Add error handling
+- Update jest.config.js for ESM support
+- Configure ts-jest with ESM preset
+- Test all backend tests
+- Aim for 80%+ code coverage
 
-**Acceptance Criteria:**
-- Files upload successfully
-- Files persist after upload
-- Files can be retrieved
-- Error handling works
-- Size limits enforced
-- Type validation works
+**Impact:** Enable automated testing, improve code quality
 
 ---
 
-#### 1.2 Automated Testing Setup
-
-**Status:** ℹ️ Infrastructure Available, Not Prioritized  
-**Priority:** Low  
-**Effort:** Not applicable
-
-**Description:**
-- Testing infrastructure is set up (Jest for backend/frontend, Playwright for E2E)
-- Manual testing is required per AGENT.md
-- Automated testing not prioritized for this project
+#### 2. Continue Legacy Page Migration
+**Status:** 🔄 In Progress (~15% complete)  
+**Effort:** 20-30 hours  
+**Description:** Migrate 92 legacy pages to Next.js App Router
 
 **Tasks:**
-- [x] Install Jest dependencies
-- [x] Configure Jest for backend
-- [x] Configure Jest for frontend
-- [x] Configure Playwright for E2E
-- [ ] Write additional tests (if needed in future)
-- [ ] Configure CI/CD pipeline for automated testing (if needed in future)
+- Migrate admin sub-pages (37 pages)
+- Migrate property category pages
+- Migrate service detail pages
+- Migrate legal pages
+- Migrate tools (calculators, comparison)
+- Remove legacy route handlers
+- Delete legacy files
 
-**Notes:**
-- Testing infrastructure is available for future use
-- Current approach relies on manual testing per AGENT.md
-- Can be prioritized if project requirements change
+**Impact:** Modernize codebase, improve performance, simplify maintenance
 
 ---
 
-#### 1.3 Deployment Configuration ✅ RESOLVED
+### Medium Priority (Near Term)
 
-**Status:** ✅ Complete  
-**Priority:** High  
-**Effort:** 3-5 days
-
-**Description:**
-- Configure Vercel for frontend
-- Configure Render for backend
-- Set up CI/CD pipeline
-- Write deployment documentation
+#### 3. Implement Refresh Token Mechanism
+**Status:** 📋 Planned  
+**Effort:** 8-12 hours  
+**Description:** Add refresh token support to reduce frequent re-authentication
 
 **Tasks:**
-- [x] Configure Vercel deployment
-- [x] Configure Render deployment
-- [x] Set up auto-deploy on git push
-- [x] Write deployment documentation
-- [x] Create render.yaml infrastructure as code
-- [x] Configure environment variables
-- [x] Test deployment pipeline
+- Design refresh token flow
+- Add refresh token endpoint
+- Store refresh token in HTTP-only cookie
+- Update frontend to use refresh token
+- Extend access token duration
+- Test refresh flow
 
-**Acceptance Criteria:**
-- Vercel deployment works ✅
-- Render deployment works ✅
-- Auto-deploy on git push ✅
-- Documentation is complete ✅
-- Environment variables configured ✅
-
-**Resolution:**
-- Vercel (frontend) and Render (backend) deployments configured
-- Auto-deploy on git push enabled
-- No action required
+**Impact:** Improve user experience, reduce login frequency
 
 ---
 
-### Phase 2: Feature Completion (2-3 weeks)
-
-#### 2.1 Analytics Data Cleanup Job
-
-**Status:** ✅ Complete  
-**Priority:** Medium  
-**Effort:** 2-3 days
-
-**Description:**
-- Implement scheduled cleanup job
-- Use retention policy from site_settings
-- Delete old analytics data
+#### 4. Add Automated Email Testing
+**Status:** 📋 Planned  
+**Effort:** 4-6 hours  
+**Description:** Test email functionality in CI/CD pipeline
 
 **Tasks:**
-- [x] Install job scheduler (node-cron)
-- [x] Create cleanup job script
-- [x] Query retention policy
-- [x] Delete old page_views
-- [x] Delete old property_views
-- [x] Delete old click_events
-- [x] Schedule job (daily/weekly)
-- [x] Add logging
-- [x] Test cleanup logic
+- Set up Mailtrap or similar
+- Mock email service in tests
+- Add email sending tests
+- Verify email content
+- Integrate with CI/CD
 
-**Acceptance Criteria:**
-- Job runs on schedule ✅
-- Old data is deleted ✅
-- Retention policy is respected ✅
-- Logging works correctly ✅
-- No data loss errors ✅
-
-**Implementation:**
-- Location: `backend/src/services/scheduledTasks.ts`
-- Schedule: Daily at 2:00 AM UTC
-- Control: `ENABLE_SCHEDULED_TASKS` environment variable
-- Manual cleanup: `POST /admin/analytics/cleanup`
+**Impact:** Ensure email functionality works correctly
 
 ---
 
-#### 2.2 Property Features UI ✅ RESOLVED
-
-**Status:** ✅ Complete  
-**Priority:** Medium  
-**Effort:** 3-5 days
-
-**Description:**
-- Create admin UI for property features
-- Add API endpoints
-- Integrate with property form
+#### 5. Implement API Documentation
+**Status:** 📋 Planned  
+**Effort:** 10-15 hours  
+**Description:** Add Swagger/OpenAPI documentation or remove unused dependencies
 
 **Tasks:**
-- [x] Create admin features page
-- [x] Add feature CRUD API endpoints
-- [x] Add feature selection to property form
-- [x] Display features in property details
-- [x] Test feature management
-- [x] Test feature display
+- Option A: Implement Swagger with swagger-jsdoc
+- Option B: Remove unused Swagger dependencies
+- Document all endpoints
+- Add examples
+- Set up Swagger UI
 
-**Acceptance Criteria:**
-- Features can be created/edited/deleted ✅
-- Features can be assigned to properties ✅
-- Features display correctly ✅
-- API endpoints work ✅
-- UI is user-friendly ✅
-
-**Resolution:**
-- Implemented
-- No action required
+**Impact:** Better API documentation or cleaner dependencies
 
 ---
 
-#### 2.3 Development Management UI ✅ RESOLVED
+### Low Priority (Future)
 
-**Status:** ✅ Complete  
-**Priority:** Medium  
-**Effort:** 3-5 days
-
-**Description:**
-- Create admin UI for developments
-- Add API endpoints
-- Integrate with property form
+#### 6. Remove Unused Dependencies
+**Status:** 📋 Planned  
+**Effort:** 0.5 hours  
+**Description:** Remove Swagger dependencies if not implementing API docs
 
 **Tasks:**
-- [x] Create admin developments page
-- [x] Add development CRUD API endpoints
-- [x] Add development selection to property form
-- [x] Display development in property details
-- [x] Test development management
-- [x] Test development display
+- Remove swagger-jsdoc from package.json
+- Remove swagger-ui-express from package.json
+- Run npm install
+- Test application
 
-**Acceptance Criteria:**
-- Developments can be created/edited/deleted ✅
-- Developments can be assigned to properties ✅
-- Developments display correctly ✅
-- API endpoints work ✅
-- UI is user-friendly ✅
-
-**Resolution:**
-- Implemented
-- No action required
+**Impact:** Cleaner dependencies, smaller bundle size
 
 ---
 
-#### 2.4 Advanced Search ✅ RESOLVED
-
-**Status:** ✅ Complete  
-**Priority:** Medium  
-**Effort:** 1-2 weeks
-
-**Description:**
-- Add advanced filter UI
-- Implement complex query logic
-- Add map view with property markers
+#### 7. Update Social Media Links
+**Status:** 📋 Planned  
+**Effort:** 0.5 hours  
+**Description:** Replace placeholder social media URLs with actual brand URLs
 
 **Tasks:**
-- [x] Design advanced filter UI
-- [x] Implement filter logic in backend
-- [x] Add price range filter
-- [x] Add location radius filter
-- [x] Add amenities filter
-- [x] Add map view with property markers
-- [x] Add view toggle (Grid/Map/Split)
-- [x] Test search functionality
-- [x] Optimize query performance
+- Update site settings with actual URLs
+- Or remove social media section if not used
+- Test links
 
-**Acceptance Criteria:**
-- Advanced filters work correctly ✅
-- Search results are accurate ✅
-- Map view displays property markers ✅
-- Performance is acceptable ✅
-- UI is intuitive ✅
-
-**Resolution:**
-- Implemented with map view and property markers
-- No action required
+**Impact:** Accurate social media presence
 
 ---
 
-#### 2.5 SEO Optimization ✅ RESOLVED
-
-**Status:** ✅ Complete  
-**Priority:** Medium  
-**Effort:** 1-2 weeks
-
-**Description:**
-- Implement dynamic meta tags
-- Generate sitemap
-- Add robots.txt
-- Add structured data
-- Configure image optimization
+#### 8. Add Password Complexity Requirements
+**Status:** 📋 Planned  
+**Effort:** 2-3 hours  
+**Description:** Enforce stronger password requirements
 
 **Tasks:**
-- [x] Implement dynamic meta tags
-- [x] Generate sitemap.xml
-- [x] Add robots.txt
-- [x] Add JSON-LD structured data
-- [x] Optimize page titles
-- [x] Optimize meta descriptions
-- [x] Configure image optimization with production domains
-- [x] Test with SEO tools
-- [x] Verify Google Search Console
+- Add password complexity validation
+- Require uppercase, lowercase, numbers, special chars
+- Add password strength meter
+- Update validation messages
+- Test password flow
 
-**Acceptance Criteria:**
-- Meta tags are dynamic ✅
-- Sitemap is generated ✅
-- Robots.txt is correct ✅
-- Structured data is valid ✅
-- Image optimization configured ✅
-- SEO score improves ✅
-
-**Resolution:**
-- Implemented with image optimization for production
-- No action required
+**Impact:** Improved security
 
 ---
 
-## Medium Term Goals
-
-### Phase 3: Security & Performance (1-2 months)
-
-#### 3.1 Security Enhancements
-
-**Status:** ✅ Complete  
-**Priority:** High  
-**Effort:** 2-3 weeks
-
-**Description:**
-- Implement CSRF protection
-- Add rate limiting
-- Add security headers
-- Implement CSP
+#### 9. Implement Account Lockout
+**Status:** 📋 Planned  
+**Effort:** 4-6 hours  
+**Description:** Lock accounts after failed login attempts
 
 **Tasks:**
-- [x] Implement CSRF tokens (middleware created, disabled for JWT API)
-- [x] Add rate limiting per IP (API, auth, contact, search limiters)
-- [x] Add rate limiting per user (future enhancement)
-- [x] Add Helmet.js security headers
-- [x] Implement Content Security Policy (configured for Leaflet maps)
-- [x] Add request logging (basic console logging)
-- [x] Add security monitoring (Sentry integration)
-- [x] Test security measures
+- Track failed login attempts
+- Lock account after N attempts
+- Implement lockout duration
+- Add unlock mechanism
+- Notify user of lockout
+- Test lockout flow
 
-**Acceptance Criteria:**
-- CSRF protection works ✅ (middleware available, disabled for JWT architecture)
-- Rate limiting prevents abuse ✅
-- Security headers are correct ✅
-- CSP is enforced ✅
-- Security events are logged ✅
-
-**Implementation:**
-- Rate Limiting: `backend/src/middleware/rateLimiter.ts`
-- Security Headers: `backend/src/app.ts` (Helmet middleware)
-- CSRF Protection: `backend/src/middleware/csrf.ts` (disabled for JWT API)
-- Error Tracking: `backend/src/config/sentry.ts`
+**Impact:** Improved security, prevent brute force
 
 ---
 
-#### 3.2 Performance Optimization
-
-**Status:** ❌ Not Started  
-**Priority:** High  
-**Effort:** 2-3 weeks
-
-**Description:**
-- Add caching layer (Redis)
-- Optimize N+1 queries
-- Configure production image domains
-- Add CDN
+#### 10. Add Email Verification
+**Status:** 📋 Planned  
+**Effort:** 6-8 hours  
+**Description:** Require email verification for new accounts
 
 **Tasks:**
-- [ ] Set up Redis cache
-- [ ] Cache frequently accessed data
-- [ ] Cache API responses
-- [ ] Optimize N+1 queries
-- [ ] Configure production image domains
-- [ ] Set up CDN for static assets
-- [ ] Implement lazy loading
-- [ ] Optimize bundle size
-- [ ] Test performance improvements
+- Add email verification token to users table
+- Send verification email on registration
+- Add verification endpoint
+- Block unverified users from certain features
+- Add resend verification option
+- Test verification flow
 
-**Acceptance Criteria:**
-- Cache reduces database load
-- Query performance improves
-- Page load times improve
-- Image optimization works
-- Bundle size is optimized
+**Impact:** Improved security, verified email addresses
 
 ---
 
-#### 3.3 Error Tracking
+## Future Enhancements 💡
 
-**Status:** ❌ Not Started  
-**Priority:** Medium  
-**Effort:** 1 week
+### Short Term (Next 3 Months)
 
-**Description:**
-- Integrate Sentry or similar
-- Configure error reporting
-- Set up alerts
+#### Performance Optimization
+- **Redis Caching:** Cache frequently accessed data (properties, categories)
+- **Database Indexing:** Add missing indexes for slow queries
+- **Image Optimization:** Further optimize images for faster loading
+- **Code Splitting:** Implement dynamic imports for larger components
 
-**Tasks:**
-- [ ] Create Sentry account
-- [ ] Install Sentry SDK
-- [ ] Initialize Sentry in backend
-- [ ] Initialize Sentry in frontend
-- [ ] Configure environment
-- [ ] Set up alerts
-- [ ] Test error tracking
-- [ ] Review error reports
+#### Security Enhancements
+- **2FA/MFA:** Add two-factor authentication for sensitive accounts
+- **Audit Logging:** Log all user actions for security audit
+- **IP-based Rate Limiting:** More sophisticated rate limiting per user
+- **Request Size Limiting:** Prevent large payload attacks
 
-**Acceptance Criteria:**
-- Errors are tracked
-- Alerts are configured
-- Error reports are useful
-- Dashboard is accessible
+#### User Experience
+- **Property Comparison UI:** Integrate comparison hook with UI component
+- **Favorites in New Pages:** Add favorites to App Router pages
+- **Property Gallery:** Enhanced image gallery with zoom
+- **Save Search Alerts:** Email alerts for saved searches
 
----
-
-### Phase 4: Feature Enhancements (2-3 months)
-
-#### 4.1 Property Comparison ✅ RESOLVED
-
-**Status:** ✅ Complete  
-**Priority:** Low  
-**Effort:** 1-2 weeks
-
-**Description:**
-- Create comparison tool
-- Allow users to compare properties
-- Display side-by-side comparison
-- Export comparison results
-
-**Tasks:**
-- [x] Design comparison UI
-- [x] Implement comparison logic
-- [x] Add property selection
-- [x] Display side-by-side comparison
-- [x] Highlight differences
-- [x] Add export functionality
-- [x] Test comparison tool
-
-**Acceptance Criteria:**
-- Comparison tool works ✅
-- Side-by-side display is clear ✅
-- Differences are highlighted ✅
-- Export works correctly ✅
-
-**Resolution:**
-- Implemented
-- No action required
+#### Content Management
+- **Rich Text Editor:** Better editor for articles and pages
+- **Image Cropping:** Crop images before upload
+- **Bulk Actions:** Bulk update/delete in admin
+- **Content Scheduling:** Schedule content publication
 
 ---
 
-#### 4.3 Calculators ✅ RESOLVED
+### Medium Term (Next 6 Months)
 
-**Status:** ✅ Complete  
-**Priority:** Low  
-**Effort:** 2-3 weeks
+#### Advanced Features
+- **Real-time Notifications:** WebSocket for live updates
+- **Chat System:** In-app messaging between users and agents
+- **Property Alerts:** Price change alerts, new listing alerts
+- **Market Analysis:** Property market trends and analytics
+- **Virtual Tours:** 3D property tours integration
 
-**Description:**
-- Implement mortgage calculator
-- Implement rental yield calculator
-- Add calculator pages
+#### Mobile Application
+- **React Native App:** Mobile app for iOS and Android
+- **Push Notifications:** Property alerts and updates
+- **Offline Mode:** View properties offline
+- **Native Maps:** Better map performance on mobile
 
-**Tasks:**
-- [x] Design calculator UI
-- [x] Implement mortgage calculation logic
-- [x] Implement yield calculation logic
-- [x] Add calculator pages
-- [x] Add to navigation
-- [x] Test calculators
-- [x] Verify calculations
+#### Marketing & SEO
+- **Blog Integration:** Advanced blog features
+- **Social Sharing:** Enhanced social media sharing
+- **SEO Tools:** Advanced SEO optimization
+- **Lead Generation:** Lead capture forms and funnels
 
-**Acceptance Criteria:**
-- Calculations are accurate ✅
-- UI is user-friendly ✅
-- Results are clear ✅
-- Calculators are accessible ✅
-
-**Resolution:**
-- Implemented
-- No action required
+#### Reporting
+- **Advanced Analytics:** More detailed analytics dashboard
+- **Custom Reports:** Generate custom reports
+- **Data Export:** Export data in various formats
+- **Performance Metrics:** Track key performance indicators
 
 ---
 
-#### 4.4 Remove Unused Dependencies
+### Long Term (Next 12 Months)
 
-**Status:** ⚠️ Identified  
-**Priority:** Low  
-**Effort:** 1-2 days
+#### Platform Expansion
+- **Multi-Tenancy:** Support multiple real estate agencies
+- **White Labeling:** Custom branding for partners
+- **API Platform:** Public API for third-party integrations
+- **Marketplace:** Property marketplace for multiple agents
 
-**Description:**
-- Remove Supabase dependencies
-- Audit all dependencies
-- Remove unused packages
+#### AI Integration
+- **Property Valuation AI:** Automated property valuation
+- **Recommendation Engine:** Property recommendations based on preferences
+- **Chatbot:** AI-powered customer support
+- **Image Recognition:** Auto-tag property images
 
-**Tasks:**
-- [ ] Verify no code uses Supabase
-- [ ] Remove Supabase dependencies
-- [ ] Audit all dependencies
-- [ ] Remove unused packages
-- [ ] Run npm install
-- [ ] Test application
-- [ ] Verify bundle size reduction
+#### Advanced Infrastructure
+- **Microservices:** Split into separate services
+- **Event-Driven Architecture:** Message queue for async tasks
+- **GraphQL:** Consider GraphQL for flexible data fetching
+- **Multi-Region Deployment:** Deploy in multiple regions
 
-**Acceptance Criteria:**
-- Unused dependencies removed
-- Application still works
-- Bundle size is reduced
-- No broken dependencies
-
----
-
-## Long Term Vision
-
-### Phase 5: Advanced Features (3-6 months)
-
-#### 5.1 Real-time Features
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort:** 4-6 weeks
-
-**Description:**
-- Add WebSocket support
-- Real-time notifications
-- Live chat for inquiries
-- Real-time analytics
-
-**Tasks:**
-- [ ] Add WebSocket server
-- [ ] Implement notification system
-- [ ] Add live chat interface
-- [ ] Implement real-time analytics
-- [ ] Test real-time features
-- [ ] Optimize WebSocket performance
-
----
-
-#### 5.2 Mobile App
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort:** 8-12 weeks
-
-**Description:**
-- Create React Native app
-- Implement core features
-- Add push notifications
-- Integrate with existing API
-
-**Tasks:**
-- [ ] Set up React Native project
-- [ ] Implement authentication
-- [ ] Implement property browsing
-- [ ] Implement favorite management
-- [ ] Add push notifications
-- [ ] Test on iOS and Android
-- [ ] Deploy to app stores
-
----
-
-#### 5.3 GraphQL API
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort:** 4-6 weeks
-
-**Description:**
-- Create GraphQL API
-- Migrate from REST
-- Add GraphQL playground
-- Update frontend to use GraphQL
-
-**Tasks:**
-- [ ] Set up Apollo Server
-- [ ] Define GraphQL schema
-- [ ] Create GraphQL resolvers
-- [ ] Migrate REST endpoints
-- [ ] Add GraphQL playground
-- [ ] Update frontend Apollo Client
-- [ ] Test GraphQL API
-- [ ] Deprecate REST endpoints
-
----
-
-#### 5.4 Microservices Architecture
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort:** 8-12 weeks
-
-**Description:**
-- Split into microservices
-- Separate API services
-- Add API gateway
-- Implement service discovery
-
-**Tasks:**
-- [ ] Design microservices architecture
-- [ ] Create API gateway
-- [ ] Extract user service
-- [ ] Extract property service
-- [ ] Extract analytics service
-- [ ] Implement service discovery
-- [ ] Add inter-service communication
-- [ ] Test microservices
-
----
-
-### Phase 6: Platform Enhancements (6-12 months)
-
-#### 6.1 Multi-Tenancy
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort:** 8-12 weeks
-
-**Description:**
-- Add multi-tenancy support
-- Tenant isolation
-- Tenant-specific settings
-- Tenant billing
-
-**Tasks:**
-- [ ] Design multi-tenancy architecture
-- [ ] Add tenant_id to entities
-- [ ] Implement tenant isolation
-- [ ] Add tenant-specific settings
-- [ ] Add tenant billing
-- [ ] Update authentication
-- [ ] Test multi-tenancy
-
----
-
-#### 6.2 Internationalization
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort**: 4-6 weeks
-
-**Description:**
-- Add i18n support
-- Multi-language support
-- Currency conversion
-- Date/time localization
-
-**Tasks:**
-- [ ] Set up i18n framework
-- [ ] Add language files
-- [ ] Implement language switcher
-- [ ] Add currency conversion
-- [ ] Add date/time localization
-- [ ] Test internationalization
-
----
-
-#### 6.3 AI Features
-
-**Status:** ❌ Not Planned  
-**Priority:** Low  
-**Effort:** 8-12 weeks
-
-**Description:**
-- AI-powered property recommendations
-- Price prediction
-- Market analysis
-- Automated property descriptions
-
-**Tasks:**
-- [ ] Choose AI/ML framework
-- [ ] Implement recommendation engine
-- [ ] Train price prediction model
-- [ ] Implement market analysis
-- [ ] Add AI content generation
-- [ ] Test AI features
-- [ ] Optimize AI performance
+#### Compliance & Privacy
+- **GDPR Compliance:** Full GDPR compliance features
+- **Data Anonymization:** Advanced data anonymization
+- **Right to be Forgotten:** Complete data deletion
+- **Privacy Dashboard:** User privacy controls
 
 ---
 
 ## Technical Debt
 
-### Current Technical Debt
+### High Priority
 
-#### 1. Frontend Migration
+1. **Backend Test Configuration** - Fix ESM issues
+2. **Legacy Page Migration** - Complete App Router migration
+3. **No Refresh Tokens** - Implement refresh token mechanism
 
-**Debt:** 100+ legacy pages need migration to App Router
-**Impact:** Medium
-**Effort:** 4-6 weeks
-**Priority:** High
+### Medium Priority
 
-#### 2. Test Coverage
+1. **No Integration Tests** - Add API integration tests
+2. **No E2E Tests** - Add end-to-end tests
+3. **No API Documentation** - Implement or remove Swagger
+4. **Error Handling** - Improve error messages and logging
 
-**Debt:** Testing infrastructure available, not prioritized
-**Impact:** Low (manual testing per AGENT.md)
-**Effort:** Not applicable (if needed in future)
-**Priority:** Low
+### Low Priority
 
-#### 3. Deployment Automation ✅ RESOLVED
-
-**Debt:** CI/CD pipeline configured
-**Impact:** None
-**Effort:** Complete
-**Priority:** N/A
-
-#### 4. Media Storage
-
-**Debt:** Supabase Storage configured, requires env vars in production
-**Impact:** Medium
-**Effort:** 1 day (configuration)
-**Priority:** Medium
-
-#### 5. N+1 Queries
-
-**Debt:** Potential N+1 queries in controllers
-**Impact:** Medium
-**Effort:** 1-2 weeks
-**Priority:** Medium
-
-#### 6. Caching
-
-**Debt:** No caching layer
-**Impact:** Medium
-**Effort:** 2-3 weeks
-**Priority:** Medium
-
-#### 7. Unused Dependencies
-
-**Debt:** Supabase libraries unused (but Supabase Storage is used)
-**Impact:** Low
-**Effort:** 1-2 days
-**Priority:** Low
+1. **Type Safety** - Improve TypeScript strictness
+2. **Code Duplication** - Remove duplicate code
+3. **Component Organization** - Better component structure
+4. **Naming Conventions** - Consistent naming across codebase
 
 ---
 
-## Deprecation Timeline
+## Dependencies
 
-### No Deprecations Planned
+### Security Updates
 
-**Current Status:** No features marked for deprecation
+**Regular Updates Required:**
+- Security patches for Node.js
+- Security patches for dependencies
+- Update to latest stable versions
+- Monitor for CVEs
 
-### Future Deprecation Considerations
+**Current Versions:**
+- Node.js: v18+ (recommend v20+)
+- Next.js: 15.0.0
+- React: 19.3.0
+- Express: 4.21.2
+- TypeORM: 1.1.1
 
-**Legacy Pages:**
-- Legacy routing wrappers may be deprecated after App Router migration completes
-- Timeline: Q4 2026
+### Deprecated Dependencies
 
-**Legacy Routes:**
-- Some API routes may be deprecated if GraphQL is implemented
-- Timeline: 2027 (if GraphQL is adopted)
-
-**Authentication:**
-- JWT authentication may be enhanced with refresh tokens
-- Timeline: 2027 (if needed)
-
----
-
-## Version Planning
-
-### Version 1.1.0 (Q4 2026)
-
-**Focus:** Infrastructure and critical features
-
-**Completed Features:**
-- ✅ Deployment configuration (Vercel + Render)
-- ✅ Analytics data cleanup job
-- ✅ Property features UI
-- ✅ Development management UI
-- ✅ Advanced search with map view
-- ✅ SEO optimization with image optimization
-- ✅ Property comparison tool
-- ✅ Mortgage calculator
-- ✅ Rental yield calculator
-- ✅ Maps integration with property markers
-- ✅ Security enhancements (CSRF, rate limiting, error tracking)
-- ✅ CI/CD pipeline (auto-deploy on git push)
-
-**Remaining Tasks:**
-- Media upload storage implementation (Supabase Storage configured, needs env vars)
-- Automated testing (infrastructure available, not prioritized)
-
-**Status:** Nearly Complete
+**Remove/Replace:**
+- Swagger dependencies (if not implementing)
+- Any deprecated packages
+- Unused dependencies
 
 ---
 
-### Version 1.2.0 (Q1 2027)
+## Technology Stack Evolution
 
-**Focus:** Security and performance
+### Consider Evaluating
 
-**Planned Features:**
-- Redis caching
-- Query optimization
-- N+1 query optimization
-- Image optimization
-- CDN setup
-- Performance monitoring
+**Frontend:**
+- Consider migrating from Next.js 15 to latest stable
+- Evaluate new React features
+- Consider alternative state management (Zustand, Jotai)
 
-**Completed in v1.1.x:**
-- CSRF protection (middleware available, disabled for JWT API)
-- Rate limiting (API, auth, contact, search)
-- Security headers (Helmet middleware)
-- Content Security Policy (configured for Leaflet maps)
-- Error tracking (Sentry integration)
-- Maps integration (Leaflet + OpenStreetMap)
-- Analytics data cleanup (node-cron)
-- JWT expiration alignment (5 minutes)
+**Backend:**
+- Consider Fastify instead of Express (better performance)
+- Evaluate Prisma instead of TypeORM (better TypeScript support)
+- Consider tRPC for type-safe APIs
 
-**Target:** February 2027
+**Database:**
+- Evaluate Neon for better development experience
+- Consider read replicas for scaling
+- Evaluate TimescaleDB for analytics data
 
 ---
 
-### Version 2.0.0 (Q2 2027)
+## Milestones
 
-**Focus:** Feature enhancements
+### Q4 2026 (October - December)
 
-**Planned Features:**
-- Property comparison tool
-- Mortgage calculator
-- Rental yield calculator
-- Clean up technical debt
-- Complete App Router migration
-- Add more automated tests
+**Goals:**
+- ✅ Complete core platform (done)
+- 🔄 Fix backend test configuration
+- 🔄 Complete 50% of legacy page migration
+- 📋 Implement refresh tokens
+- 📋 Add integration tests
 
-**Target:** May 2027
+**Success Metrics:**
+- Backend tests passing
+- 46 legacy pages migrated
+- Refresh token implementation
+- 50% API coverage
+
+### Q1 2027 (January - March)
+
+**Goals:**
+- Complete legacy page migration
+- Add E2E tests
+- Implement API documentation
+- Add 2FA/MFA
+- Launch mobile app MVP
+
+**Success Metrics:**
+- 0 legacy pages remaining
+- E2E tests for critical flows
+- API documentation complete
+- 2FA for admin accounts
+- Mobile app beta testing
+
+### Q2 2027 (April - June)
+
+**Goals:**
+- Launch mobile app
+- Add real-time notifications
+- Implement advanced analytics
+- Add AI property valuation
+- Launch multi-tenant support
+
+**Success Metrics:**
+- Mobile app in app stores
+- WebSocket notifications working
+- Advanced analytics dashboard
+- AI valuation accuracy > 80%
+- 3 agency partners onboarded
 
 ---
 
-## Contribution Guidelines
+## Resource Allocation
 
-### Feature Requests
+### Development Team
 
-**Process:**
-1. Submit feature request via GitHub Issues
-2. Include business justification
-3. Include proposed implementation
-4. Include estimated effort
-5. Community discussion
+**Recommended Team Size:**
+- 1 Full-stack Developer (current)
+- 1 Frontend Developer (recommended)
+- 1 Backend Developer (recommended)
+- 1 QA Engineer (recommended)
+- 1 DevOps Engineer (part-time, recommended)
 
-**Evaluation Criteria:**
-- Business value
-- User impact
-- Development effort
-- Alignment with roadmap
-- Resource availability
+### Time Allocation
 
-### Bug Reports
+**Current (Solo Developer):**
+- 40% feature development
+- 30% bug fixes
+- 20% maintenance
+- 10% documentation
 
-**Process:**
-1. Submit bug report via GitHub Issues
-2. Include steps to reproduce
-2. Include expected vs actual behavior
-3. Include environment details
-4. Include error messages/logs
-
-**Priority:**
-- Critical: Fixes immediately
-- High: Next sprint
-- Medium: When time permits
-- Low: Backlog
+**Recommended (Team):**
+- 50% feature development
+- 20% bug fixes
+- 15% maintenance
+- 10% testing
+- 5% documentation
 
 ---
 
@@ -988,189 +492,119 @@
 
 ### Technical Risks
 
-**Media Storage Implementation:**
-- Risk: Complexity of integration
-- Mitigation: Choose proven provider (S3, Cloudinary)
-- Timeline: 3-5 days
+**High Risk:**
+- Backend test configuration failure
+- Legacy page migration complexity
+- Third-party service dependencies (Brevo, Supabase)
 
-**App Router Migration:**
-- Risk: Breaking existing functionality
-- Mitigation: Use legacy wrappers during migration
-- Timeline: 4-6 weeks
+**Medium Risk:**
+- Security vulnerabilities in dependencies
+- Performance issues at scale
+- Database migration failures
 
-**Testing Setup:**
-- Risk: Time-consuming to implement
-- Mitigation: Focus on critical paths first
-- Timeline: 2-3 weeks
+**Low Risk:**
+- UI/UX inconsistencies
+- Minor bugs
+- Documentation gaps
 
-### Business Risks
+### Mitigation Strategies
 
-**Timeline Delays:**
-- Risk: Features may take longer than estimated
-- Mitigation: Build in buffer time
-- Adjust priorities as needed
+**High Risk Mitigation:**
+- Prioritize test configuration fix
+- Plan legacy migration carefully with rollback strategy
+- Have fallback options for third-party services
 
-**Resource Constraints:**
-- Risk: Limited development resources
-- Mitigation: Prioritize critical features
-- Defer non-essential features
+**Medium Risk Mitigation:**
+- Regular dependency updates
+- Performance monitoring
+- Test migrations in staging
+
+**Low Risk Mitigation:**
+- Regular code reviews
+- User testing
+- Keep documentation updated
 
 ---
 
 ## Success Metrics
 
-### Version 1.1.0 Success Criteria
+### Key Performance Indicators (KPIs)
 
-- [ ] Media upload storage implemented and working
-- [ ] Test coverage > 70% for critical paths
-- [ ] CI/CD pipeline deployed successfully
-- [ ] Analytics cleanup job running
-- [ ] Property features UI implemented
-- [ ] Development management UI implemented
-- [ ] Advanced search working
-- [ ] SEO score improved
+**User Engagement:**
+- Monthly active users
+- Property views per user
+- Inquiry conversion rate
+- Time on site
 
-### Overall Success Criteria
+**Technical Performance:**
+- Page load time < 2 seconds
+- API response time < 200ms
+- Uptime > 99.5%
+- Error rate < 0.1%
 
-- [ ] All critical infrastructure in place
-- [ ] Test coverage > 80%
-- [ ] Automated deployment working
-- [ ] Security vulnerabilities addressed
-- [ ] Performance optimized
-- [ ] Documentation complete
-- [ ] User satisfaction high
+**Business Metrics:**
+- Number of properties listed
+- Number of inquiries
+- Number of viewings scheduled
+- Conversion rate (inquiry to viewing)
+
+**Code Quality:**
+- Test coverage > 80%
+- Bug count < 10 per release
+- Code review participation
+- Documentation completeness
 
 ---
 
 ## Feedback Loop
 
-### User Feedback Collection
+### User Feedback
 
-**Methods:**
+**Channels:**
+- Contact form
 - User surveys
-- Analytics data
 - Support tickets
-- GitHub Issues
+- In-app feedback
 
-### Iteration Process
-
+**Process:**
 1. Collect feedback
-2. Analyze feedback
-3. Prioritize improvements
-4. Plan next sprint
-5. Implement improvements
-6. Collect more feedback
+2. Categorize feedback
+3. Prioritize based on impact
+4. Add to roadmap
+5. Implement and test
+6. Notify users of changes
 
-### Continuous Improvement
+### Developer Feedback
 
-**Practices:**
-- Regular retrospectives
-- Performance monitoring
-- Security audits
-- User testing
-- Accessibility testing
+**Channels:**
+- Code reviews
+- Team meetings
+- Stand-ups
+- Retrospectives
+
+**Process:**
+1. Regular code reviews
+2. Discuss technical decisions
+3. Identify improvement areas
+4. Update development practices
+5. Share knowledge
 
 ---
 
 ## Conclusion
 
-### Current State
+This roadmap provides a clear path forward for the Ingata Real Estate platform. The immediate focus is on fixing critical issues (backend tests, legacy migration) and improving user experience (refresh tokens). Future enhancements focus on advanced features, mobile application, and AI integration.
 
-The Ingata Real Estate platform is **70% complete** with core functionality working. The platform is production-ready with manual deployment, but lacks automated testing, deployment automation, and some enhancements.
+The roadmap is flexible and will be updated based on:
+- User feedback
+- Business priorities
+- Technical constraints
+- Resource availability
+- Market changes
 
-### Next Steps
-
-**Immediate (Next 4-6 weeks):**
-1. Implement media upload storage
-2. Set up automated testing
-3. Configure deployment pipeline
-4. Implement analytics cleanup
-5. Add property features UI
-6. Add development management UI
-
-**Short Term (Next 2-3 months):**
-1. Add security enhancements
-2. Optimize performance
-3. Add error tracking
-4. Implement advanced search
-5. Optimize SEO
-
-**Long Term (Next 6-12 months):**
-1. Evaluate maps integration
-2. Evaluate calculators
-3. Clean up technical debt
-4. Consider mobile app
-5. Evaluate GraphQL adoption
-
-### Vision
-
-To become a **leading real estate platform** in the target market with:
-- Excellent user experience
-- Robust and scalable architecture
-- Comprehensive feature set
-- Strong security posture
-- High performance
-- Active community
-
----
-
-## Appendix
-
-### Resource Allocation
-
-**Development Team:**
-- 1 Backend Developer
-- 1 Frontend Developer
-- 1 Part-time DevOps (when needed)
-
-**Time Allocation:**
-- 60% New features
-- 20% Bug fixes
-- 10% Technical debt
-- 10% Documentation
-
-### Budget Considerations
-
-**Infrastructure Costs:**
-- VPS: $20-40/month
-- Database: $19-50/month (Neon Pro)
-- Domain: $10-15/year
-- Total: $50-100/month
-
-**Cloud Deployment:**
-- Railway/Render: $40-100/month
-- Vercel: Free or $20/month
-- Neon: $19-50/month
-- Total: $60-170/month
-
-### Technology Choices Review
-
-**Current Stack:**
-- Backend: Node.js, Express, TypeORM, PostgreSQL
-- Frontend: Next.js, TypeScript, Tailwind CSS
-
-**Alternatives Considered:**
-- Database: MongoDB (rejected for relational needs)
-- Backend: NestJS (rejected for simplicity)
-- Frontend: Vue.js (rejected for ecosystem)
-- CSS: Styled Components (rejected for Tailwind)
-
-**Rationale:**
-- Current stack is well-suited for requirements
-- Strong community support
-- Good documentation
-- Familiar to team
-
----
-
-## Contact
-
-### Project Questions
-
-**Development Rules:** See `agent.md`  
-**Documentation:** See `/docs` folder  
-**Issues:** Report via GitHub Issues
-
-### Support
-
-For technical support or questions about the roadmap, please refer to the project documentation or create a GitHub Issue.
+**Next Steps:**
+1. Fix backend test configuration (immediate)
+2. Continue legacy page migration (ongoing)
+3. Implement refresh tokens (near term)
+4. Plan for mobile app development (medium term)
+5. Evaluate AI integration opportunities (long term)
