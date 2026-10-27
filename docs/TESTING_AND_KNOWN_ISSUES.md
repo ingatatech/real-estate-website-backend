@@ -583,9 +583,11 @@ All documentation has been updated in this audit:
 - ✅ AUTHENTICATION_AND_PERMISSIONS.md
 - ✅ USER_ROLES_AND_FEATURES.md
 - ✅ TESTING_AND_KNOWN_ISSUES.md (this file)
-- ✅ DEPLOYMENT.md (to be updated)
-- ✅ DEVELOPMENT_ROADMAP.md (to be updated)
-- ✅ README.md (to be created)
+- ✅ DEPLOYMENT.md
+- ✅ README.md (root)
+- ✅ backend/README.md
+- ✅ frontend/README.md
+- ✅ CHANGELOG.md (newly created)
 
 ---
 
@@ -712,5 +714,13 @@ All documentation has been updated in this audit:
 - ✅ Conducted comprehensive testing audit
 - ✅ Documented all known issues
 - ✅ Fixed outdated documentation
+- ✅ Resolved Next.js production build errors
+  - Fixed PropertySearch.tsx syntax error (character encoding issue)
+  - Fixed import path in terms-and-conditions page
+  - Replaced missing LegacyAdminRoute with redirect
+  - Fixed AdminDashboard Link components (to= to href=)
+  - Fixed PropertyDetails ImageViewer props
+  - Added Suspense boundaries for useSearchParams usage
+  - Fixed useSearchParams type conflicts
 - ⚠️ Identified backend test configuration issue
 - ⚠️ Documented legacy page migration status
