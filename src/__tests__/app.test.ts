@@ -1,7 +1,7 @@
 import request from 'supertest';
-import app from '../app';
+import app from '../app.js';
 
-describe.skip('API Health Check', () => {
+describe('API Root Endpoint', () => {
   it('should return success message for root endpoint', async () => {
     const response = await request(app).get('/');
 

@@ -1,0 +1,47 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import routes from './routes/index.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { initSentry } from './config/sentry.js';
+import { apiRateLimiter } from './middleware/rateLimiter.js';
+// Initialize Sentry
+initSentry();
+const app = express();
+// Configure CORS
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'http://localhost:3000',
+    'https://ingata-real-estate.vercel.app',
+];
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true,
+}));
+// Security headers with Helmet
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:", "https://unpkg.com"],
+            scriptSrc: ["'self'"],
+            connectSrc: ["'self'", "https://ingata-backend.onrender.com", "http://localhost:5000"],
+        },
+    },
+    crossOriginEmbedderPolicy: false, // Needed for Leaflet maps
+}));
+app.use(express.json());
+// Apply rate limiting to all API routes
+app.use('/api/v1', apiRateLimiter);
+app.get('/', (_req, res) => {
+    res.json({
+        success: true,
+        message: 'Ingata Real Estate API is running',
+        health: '/api/v1/health',
+    });
+});
+app.use('/api/v1', routes);
+app.use(errorHandler);
+export default app;

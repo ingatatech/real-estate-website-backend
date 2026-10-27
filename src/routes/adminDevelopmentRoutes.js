@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import multer from 'multer';
+import { getAllDevelopments, getDevelopmentById, createDevelopment, updateDevelopment, deleteDevelopment, } from '../controllers/developmentController.js';
+import { uploadDevelopmentMedia } from '../controllers/propertyMediaController.js';
+import { requireAuth } from '../middleware/auth.js';
+const router = Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
+router.post('/media', requireAuth, upload.single('file'), uploadDevelopmentMedia);
+router.get('/', getAllDevelopments);
+router.get('/:id', getDevelopmentById);
+router.post('/', createDevelopment);
+router.patch('/:id', updateDevelopment);
+router.delete('/:id', deleteDevelopment);
+export default router;

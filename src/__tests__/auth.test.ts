@@ -1,24 +1,7 @@
 import request from 'supertest';
-import { AppDataSource } from '../lib/typeorm';
-import { User } from '../entities/User';
-import { Role } from '../entities/Role';
-import app from '../app';
+import app from '../app.js';
 
-describe.skip('Auth Controller', () => {
-  beforeAll(async () => {
-    // Initialize database connection for tests
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-    }
-  });
-
-  afterAll(async () => {
-    // Close database connection
-    if (AppDataSource.isInitialized) {
-      await AppDataSource.destroy();
-    }
-  });
-
+describe('Auth Controller', () => {
   describe('POST /api/v1/auth/admin/login', () => {
     it('should return 400 if email or password is missing', async () => {
       const response = await request(app)
@@ -37,12 +20,6 @@ describe.skip('Auth Controller', () => {
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('success', false);
-    });
-
-    it('should return 403 for non-admin users', async () => {
-      // This test would require creating a test user with non-admin role
-      // For now, we'll skip it
-      expect(true).toBe(true);
     });
   });
 

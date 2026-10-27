@@ -1,0 +1,19 @@
+export const authorize = (...allowedRoles) => {
+    return (req, res, next) => {
+        const user = req.user;
+        if (!user || !user.role) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not authenticated',
+            });
+        }
+        // Case-insensitive role comparison
+        if (!allowedRoles.map(r => r.toLowerCase()).includes(user.role.toLowerCase())) {
+            return res.status(403).json({
+                success: false,
+                message: 'Forbidden: insufficient permissions',
+            });
+        }
+        return next();
+    };
+};
