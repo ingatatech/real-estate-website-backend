@@ -11,9 +11,9 @@
         "seed": "npm run build && node dist/seed.js",
         "seed:article-categories": "tsx src/scripts/seedArticleCategories.ts",
         "fix-schema": "npm run build && node dist/fix-schema.js",
-        "test": "npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
-        "test:watch": "npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch --passWithNoTests",
-        "test:coverage": "npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage --passWithNoTests"
+        "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
+        "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch --passWithNoTests",
+        "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage --passWithNoTests"
     },
     "dependencies": {
         "@sentry/node": "^11.8.0",
