@@ -74,6 +74,9 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Media storage (Supabase)
 - ✅ Error tracking (Sentry)
 - ✅ CI/CD (auto-deploy)
+- ✅ API documentation (docs/API_REFERENCE.md)
+- ✅ Dependency cleanup (removed unused packages)
+- ✅ Express trust proxy configuration for Render
 
 **Frontend:**
 - ✅ Next.js 15 with App Router
@@ -252,7 +255,8 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 1. **No Integration Tests** - Add API integration tests
 2. **No E2E Tests** - Add end-to-end tests
-3. **Error Handling** - Improve error messages and logging
+3. ~~**No API Documentation**~~ ✅ Complete - API documentation exists at docs/API_REFERENCE.md
+4. **Error Handling** - Improve error messages and logging
 
 ### Low Priority
 
@@ -279,6 +283,13 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - React: 19.3.0
 - Express: 4.21.2
 - TypeORM: 1.1.1
+
+### Deprecated Dependencies
+
+**Remove/Replace:**
+- ~~Swagger dependencies (if not implementing)~~ ✅ Removed
+- Any deprecated packages
+- ~~Unused dependencies~~ ✅ Removed
 
 ---
 
@@ -335,11 +346,13 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 **Goals:**
 - Add E2E tests
+- ~~Implement API documentation~~ ✅ Complete
 - Add 2FA/MFA
 - Launch mobile app MVP
 
 **Success Metrics:**
 - E2E tests for critical flows
+- ~~API documentation complete~~ ✅ Complete
 - 2FA for admin accounts
 - Mobile app beta testing
 
