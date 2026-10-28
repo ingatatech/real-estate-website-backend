@@ -74,6 +74,8 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Media storage (Supabase)
 - ✅ Error tracking (Sentry)
 - ✅ CI/CD (auto-deploy)
+- ✅ API documentation (docs/API_REFERENCE.md)
+- ✅ Dependency cleanup (removed unused packages)
 
 **Frontend:**
 - ✅ Next.js 15 with App Router
@@ -144,13 +146,17 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 #### 4. ~~Remove Unused Dependencies~~ ✅ Complete
 **Status:** ✅ Complete
 **Effort:** Completed
-**Description:** Removed unused Swagger dependencies
+**Description:** Removed unused dependencies from both frontend and backend
 
 **Completed Tasks:**
-- ✅ Removed swagger-jsdoc from package.json
-- ✅ Removed swagger-ui-express from package.json
-- ✅ Removed @types/swagger-ui-express from package.json
-- ✅ Ran npm install
+- ✅ Removed swagger-jsdoc from backend package.json
+- ✅ Removed swagger-ui-express from backend package.json
+- ✅ Removed @types/swagger-ui-express from backend package.json
+- ✅ Removed cookie-parser from backend package.json (not used)
+- ✅ Removed @types/cookie-parser from backend package.json (not used)
+- ✅ Removed react-leaflet from frontend package.json (not used, using leaflet directly)
+- ✅ Ran npm install on backend
+- ✅ Ran npm install on frontend
 - ✅ Tested application
 
 **Impact:** Cleaner dependencies, smaller bundle size
@@ -248,7 +254,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 1. **No Integration Tests** - Add API integration tests
 2. **No E2E Tests** - Add end-to-end tests
-3. **No API Documentation** - Implement or remove Swagger
+3. ~~**No API Documentation**~~ ✅ Complete - API documentation exists at docs/API_REFERENCE.md
 4. **Error Handling** - Improve error messages and logging
 
 ### Low Priority
@@ -280,9 +286,9 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 ### Deprecated Dependencies
 
 **Remove/Replace:**
-- Swagger dependencies (if not implementing)
+- ~~Swagger dependencies (if not implementing)~~ ✅ Removed
 - Any deprecated packages
-- Unused dependencies
+- ~~Unused dependencies~~ ✅ Removed
 
 ---
 
@@ -338,14 +344,14 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 **Goals:**
 - Complete legacy page migration
 - Add E2E tests
-- Implement API documentation
+- ~~Implement API documentation~~ ✅ Complete
 - Add 2FA/MFA
 - Launch mobile app MVP
 
 **Success Metrics:**
 - 0 legacy pages remaining
 - E2E tests for critical flows
-- API documentation complete
+- ~~API documentation complete~~ ✅ Complete
 - 2FA for admin accounts
 - Mobile app beta testing
 
