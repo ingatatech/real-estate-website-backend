@@ -139,34 +139,23 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 ---
 
-#### 4. Implement API Documentation
-**Status:** 📋 Planned
-**Effort:** 10-15 hours
-**Description:** Add Swagger/OpenAPI documentation or remove unused dependencies
-
-**Tasks:**
-- Option A: Implement Swagger with swagger-jsdoc
-- Option B: Remove unused Swagger dependencies
-- Document all endpoints
-- Add examples
-- Set up Swagger UI
-
-**Impact:** Better API documentation or cleaner dependencies
-
----
-
 ### Low Priority (Future)
 
-#### 5. Remove Unused Dependencies
-**Status:** 📋 Planned
-**Effort:** 0.5 hours
-**Description:** Remove Swagger dependencies if not implementing API docs
+#### 4. ~~Remove Unused Dependencies~~ ✅ Complete
+**Status:** ✅ Complete
+**Effort:** Completed
+**Description:** Removed unused dependencies from both frontend and backend
 
-**Tasks:**
-- Remove swagger-jsdoc from package.json
-- Remove swagger-ui-express from package.json
-- Run npm install
-- Test application
+**Completed Tasks:**
+- ✅ Removed swagger-jsdoc from backend package.json
+- ✅ Removed swagger-ui-express from backend package.json
+- ✅ Removed @types/swagger-ui-express from backend package.json
+- ✅ Removed cookie-parser from backend package.json (not used)
+- ✅ Removed @types/cookie-parser from backend package.json (not used)
+- ✅ Removed react-leaflet from frontend package.json (not used, using leaflet directly)
+- ✅ Ran npm install on backend
+- ✅ Ran npm install on frontend
+- ✅ Tested application
 
 **Impact:** Cleaner dependencies, smaller bundle size
 
@@ -263,8 +252,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 1. **No Integration Tests** - Add API integration tests
 2. **No E2E Tests** - Add end-to-end tests
-3. **No API Documentation** - Implement or remove Swagger
-4. **Error Handling** - Improve error messages and logging
+3. **Error Handling** - Improve error messages and logging
 
 ### Low Priority
 
@@ -291,13 +279,6 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - React: 19.3.0
 - Express: 4.21.2
 - TypeORM: 1.1.1
-
-### Deprecated Dependencies
-
-**Remove/Replace:**
-- Swagger dependencies (if not implementing)
-- Any deprecated packages
-- Unused dependencies
 
 ---
 
@@ -337,6 +318,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Implement favorites in App Router pages (done)
 - ✅ Implement enhanced property gallery with zoom (done)
 - ✅ Implement saved search email alerts (done)
+- ✅ Remove unused dependencies (done)
 - 🔄 Fix backend test configuration
 - 📋 Add integration tests
 
@@ -345,22 +327,19 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Refresh token implementation
 - ✅ Security features implemented
 - ✅ User experience features implemented
+- ✅ Cleaner dependencies
 - Backend tests passing
 - 50% API coverage
 
 ### Q1 2027 (January - March)
 
 **Goals:**
-- Complete legacy page migration
 - Add E2E tests
-- Implement API documentation
 - Add 2FA/MFA
 - Launch mobile app MVP
 
 **Success Metrics:**
-- 0 legacy pages remaining
 - E2E tests for critical flows
-- API documentation complete
 - 2FA for admin accounts
 - Mobile app beta testing
 
@@ -416,7 +395,6 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 **High Risk:**
 - Backend test configuration failure
-- Legacy page migration complexity
 - Third-party service dependencies (Brevo, Supabase)
 
 **Medium Risk:**
@@ -433,7 +411,6 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 **High Risk Mitigation:**
 - Prioritize test configuration fix
-- Plan legacy migration carefully with rollback strategy
 - Have fallback options for third-party services
 
 **Medium Risk Mitigation:**
@@ -515,7 +492,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 ## Conclusion
 
-This roadmap provides a clear path forward for the Ingata Real Estate platform. The immediate focus is on fixing critical issues (backend tests, legacy migration) and improving user experience (refresh tokens). Future enhancements focus on advanced features, mobile application, and AI integration.
+This roadmap provides a clear path forward for the Ingata Real Estate platform. The immediate focus is on fixing critical issues (backend tests) and improving code quality. Future enhancements focus on advanced features, mobile application, and AI integration.
 
 The roadmap is flexible and will be updated based on:
 - User feedback
@@ -526,7 +503,5 @@ The roadmap is flexible and will be updated based on:
 
 **Next Steps:**
 1. Fix backend test configuration (immediate)
-2. Continue legacy page migration (ongoing)
-3. Implement refresh tokens (near term)
-4. Plan for mobile app development (medium term)
-5. Evaluate AI integration opportunities (long term)
+2. Plan for mobile app development (medium term)
+3. Evaluate AI integration opportunities (long term)

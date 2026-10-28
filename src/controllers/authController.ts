@@ -5,7 +5,9 @@ import jwt from 'jsonwebtoken';
 import { AppDataSource } from '../lib/typeorm.js';
 import { User } from '../entities/User.js';
 import { Role } from '../entities/Role.js';
+import { SiteSetting } from '../entities/SiteSetting.js';
 import { isPasswordResetEmailConfigured, sendPasswordResetEmail } from '../lib/passwordResetEmail.js';
+import { sendVerificationEmail } from '../lib/verificationEmail.js';
 import { getPasswordPolicy, validatePasswordComplexity } from '../utils/passwordValidator.js';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -16,6 +18,7 @@ const PASSWORD_RESET_TTL_MS = 30 * 60 * 1000;
 const PASSWORD_RESET_RESPONSE = 'If an account exists for that email, password reset instructions will be sent.';
 
 const hashResetToken = (token: string) => createHash('sha256').update(token).digest('hex');
+const hashVerificationToken = (token: string) => createHash('sha256').update(token).digest('hex');
 
 const generateTokens = (user: { id: string; email: string; role: string }) => {
   const token = jwt.sign(
@@ -29,6 +32,18 @@ const generateTokens = (user: { id: string; email: string; role: string }) => {
     { expiresIn: JWT_REFRESH_EXPIRES_IN } as jwt.SignOptions
   );
   return { token, refreshToken };
+};
+
+const loadLockoutSettings = async (): Promise<{ maxAttempts: number; lockWindowMinutes: number }> => {
+  try {
+    const settings = await AppDataSource.getRepository(SiteSetting).findOne({ where: { id: 'default' } });
+    return {
+      maxAttempts: settings?.maxAuthAttempts ?? 5,
+      lockWindowMinutes: settings?.authRateLimitWindowMinutes ?? 15,
+    };
+  } catch {
+    return { maxAttempts: 5, lockWindowMinutes: 15 };
+  }
 };
 
 // ─── Admin Login ────────────────────────────────────────────────────────────
@@ -59,11 +74,30 @@ export const adminLogin = async (req: Request, res: Response) => {
       return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
     }
 
+    // Check account lockout
+    const now = new Date();
+    if (user.lockedUntil && user.lockedUntil > now) {
+      const minutesLeft = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 60000);
+      return res.status(423).json({ success: false, message: `Account is temporarily locked. Try again in ${minutesLeft} minute(s).` });
+    }
+
     // Verify password
     const passwordValid = await bcrypt.compare(String(password), user.passwordHash);
     if (!passwordValid) {
+      const { maxAttempts, lockWindowMinutes } = await loadLockoutSettings();
+      user.failedLoginAttempts = (user.failedLoginAttempts ?? 0) + 1;
+      if (user.failedLoginAttempts >= maxAttempts) {
+        user.lockedUntil = new Date(Date.now() + lockWindowMinutes * 60 * 1000);
+        await userRepo.save(user);
+        return res.status(423).json({ success: false, message: `Too many failed attempts. Account locked for ${lockWindowMinutes} minute(s).` });
+      }
+      await userRepo.save(user);
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
+
+    // Reset lockout on success
+    user.failedLoginAttempts = 0;
+    user.lockedUntil = null;
 
     // Update last login timestamp
     user.lastLoginAt = new Date();
@@ -119,10 +153,29 @@ export const login = async (req: Request, res: Response) => {
       return res.status(403).json({ success: false, message: 'Account is deactivated.' });
     }
 
+    // Check account lockout
+    const now = new Date();
+    if (user.lockedUntil && user.lockedUntil > now) {
+      const minutesLeft = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 60000);
+      return res.status(423).json({ success: false, message: `Account is temporarily locked. Try again in ${minutesLeft} minute(s).` });
+    }
+
     const passwordValid = await bcrypt.compare(String(password), user.passwordHash);
     if (!passwordValid) {
+      const { maxAttempts, lockWindowMinutes } = await loadLockoutSettings();
+      user.failedLoginAttempts = (user.failedLoginAttempts ?? 0) + 1;
+      if (user.failedLoginAttempts >= maxAttempts) {
+        user.lockedUntil = new Date(Date.now() + lockWindowMinutes * 60 * 1000);
+        await userRepo.save(user);
+        return res.status(423).json({ success: false, message: `Too many failed attempts. Account locked for ${lockWindowMinutes} minute(s).` });
+      }
+      await userRepo.save(user);
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
+
+    // Reset lockout on success
+    user.failedLoginAttempts = 0;
+    user.lockedUntil = null;
 
     user.lastLoginAt = new Date();
     await userRepo.save(user);
@@ -262,6 +315,16 @@ export const register = async (req: Request, res: Response) => {
     });
     const savedUser = await userRepo.save(user);
 
+    // Send verification email (fire-and-forget — never block registration)
+    const verificationToken = randomBytes(32).toString('hex');
+    const verificationTokenHash = hashVerificationToken(verificationToken);
+    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await userRepo.update(savedUser.id, {
+      emailVerificationTokenHash: verificationTokenHash,
+      emailVerificationExpiresAt: verificationExpiresAt,
+    });
+    sendVerificationEmail(savedUser.email, verificationToken).catch(() => {});
+
     const userWithRole = await userRepo.findOne({
       where: { id: savedUser.id },
       relations: { role: true },
@@ -279,7 +342,8 @@ export const register = async (req: Request, res: Response) => {
       data: {
         token,
         refreshToken,
-        user: { id: savedUser.id, name: savedUser.name, email: savedUser.email, role: roleName },
+        user: { id: savedUser.id, name: savedUser.name, email: savedUser.email, role: roleName, emailVerified: false },
+        message: 'Registration successful. Please check your email to verify your account.',
       },
     });
   } catch (error) {
@@ -375,6 +439,7 @@ export const getMe = async (req: Request, res: Response) => {
         email: user.email,
         phone: user.phone,
         isActive: user.isActive,
+        isEmailVerified: user.isEmailVerified,
         createdAt: user.createdAt,
         role: {
           name: user.role.name,
@@ -416,6 +481,74 @@ export const updateProfile = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+// ─── Verify Email ─────────────────────────────────────────────────────────────
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const token = req.query.token as string;
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'Verification token is required.' });
+    }
+
+    const tokenHash = hashVerificationToken(token);
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { emailVerificationTokenHash: tokenHash } });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification link.' });
+    }
+
+    if (user.isEmailVerified) {
+      return res.json({ success: true, message: 'Email already verified.' });
+    }
+
+    if (user.emailVerificationExpiresAt && user.emailVerificationExpiresAt < new Date()) {
+      return res.status(400).json({ success: false, message: 'Verification link has expired. Please request a new one.' });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationTokenHash = null;
+    user.emailVerificationExpiresAt = null;
+    await userRepo.save(user);
+
+    return res.json({ success: true, message: 'Email verified successfully. You can now log in.' });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+// ─── Resend Verification Email ────────────────────────────────────────────────
+export const resendVerificationEmail = async (req: Request, res: Response) => {
+  try {
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
+    }
+
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.createQueryBuilder('user')
+      .where('LOWER(user.email) = :email', { email })
+      .getOne();
+
+    // Always return success to avoid leaking user existence
+    if (!user || !user.isActive || user.isEmailVerified) {
+      return res.json({ success: true, message: 'If an account exists for that email and is not yet verified, a verification email will be sent.' });
+    }
+
+    const verificationToken = randomBytes(32).toString('hex');
+    user.emailVerificationTokenHash = hashVerificationToken(verificationToken);
+    user.emailVerificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await userRepo.save(user);
+
+    sendVerificationEmail(user.email, verificationToken).catch(() => {});
+
+    return res.json({ success: true, message: 'If an account exists for that email and is not yet verified, a verification email will be sent.' });
+  } catch (error) {
+    console.error('Resend verification email error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
