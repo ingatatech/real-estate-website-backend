@@ -1,7 +1,7 @@
 services:
   - type: web
     name: ingata-backend
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
@@ -19,7 +19,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://your-frontend.vercel.app
+        value: https://ingata-real-estate.vercel.app/
       - key: EMAIL_HOST
         sync: false
       - key: EMAIL_PORT
