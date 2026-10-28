@@ -6,6 +6,7 @@ import {
   getPropertySearches,
   replacePropertySearch,
   updatePropertySearch,
+  triggerSavedSearchAlertsHandler,
 } from '../controllers/propertySearchController.js';
 
 import { requireAuth } from '../middleware/auth.js';
@@ -18,6 +19,7 @@ router.use(requireAuth);
 
 router.get('/', searchRateLimiter, getPropertySearches);
 router.post('/', createPropertySearch);
+router.post('/trigger-alerts', triggerSavedSearchAlertsHandler);
 router.get('/:id', getPropertySearchById);
 router.put('/:id', replacePropertySearch);
 router.patch('/:id', updatePropertySearch);

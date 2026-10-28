@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { AppDataSource } from '../lib/typeorm.js';
 import { PropertySearch } from '../entities/PropertySearch.js';
+import { checkAndSendSavedSearchAlerts } from '../services/savedSearchAlertService.js';
 
 const optionalNumber = (value: unknown) => {
   if (value === undefined || value === null || value === '') return undefined;
@@ -129,6 +130,19 @@ export const deletePropertySearch = async (req: Request, res: Response, next: (e
     if (!search) return res.status(404).json({ success: false, message: 'Property search not found' });
     await searchRepo.remove(search);
     return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const triggerSavedSearchAlertsHandler = async (_req: Request, res: Response, next: (error: unknown) => void) => {
+  try {
+    const result = await checkAndSendSavedSearchAlerts();
+    return res.json({
+      success: true,
+      message: 'Saved search alerts processed successfully.',
+      data: result,
+    });
   } catch (error) {
     return next(error);
   }

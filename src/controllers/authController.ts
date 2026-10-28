@@ -9,11 +9,27 @@ import { isPasswordResetEmailConfigured, sendPasswordResetEmail } from '../lib/p
 import { getPasswordPolicy, validatePasswordComplexity } from '../utils/passwordValidator.js';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '5m';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || (JWT_SECRET ? `${JWT_SECRET}_refresh` : 'ingata_jwt_refresh_secret_key');
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 const PASSWORD_RESET_TTL_MS = 30 * 60 * 1000;
 const PASSWORD_RESET_RESPONSE = 'If an account exists for that email, password reset instructions will be sent.';
 
 const hashResetToken = (token: string) => createHash('sha256').update(token).digest('hex');
+
+const generateTokens = (user: { id: string; email: string; role: string }) => {
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
+  );
+  const refreshToken = jwt.sign(
+    { id: user.id, email: user.email, role: user.role, type: 'refresh' },
+    JWT_REFRESH_SECRET,
+    { expiresIn: JWT_REFRESH_EXPIRES_IN } as jwt.SignOptions
+  );
+  return { token, refreshToken };
+};
 
 // ─── Admin Login ────────────────────────────────────────────────────────────
 export const adminLogin = async (req: Request, res: Response) => {
@@ -53,18 +69,19 @@ export const adminLogin = async (req: Request, res: Response) => {
     user.lastLoginAt = new Date();
     await userRepo.save(user);
 
-    // Sign JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role.name },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
-    );
+    // Sign JWT & Refresh Token
+    const { token, refreshToken } = generateTokens({
+      id: user.id,
+      email: user.email,
+      role: user.role.name,
+    });
 
     return res.json({
       success: true,
       message: 'Login successful.',
       data: {
         token,
+        refreshToken,
         user: {
           id: user.id,
           name: user.name,
@@ -110,15 +127,19 @@ export const login = async (req: Request, res: Response) => {
     user.lastLoginAt = new Date();
     await userRepo.save(user);
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role.name },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
-    );
+    const { token, refreshToken } = generateTokens({
+      id: user.id,
+      email: user.email,
+      role: user.role.name,
+    });
 
     return res.json({
       success: true,
-      data: { token, user: { id: user.id, name: user.name, email: user.email, role: user.role.name } },
+      data: {
+        token,
+        refreshToken,
+        user: { id: user.id, name: user.name, email: user.email, role: user.role.name },
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Internal server error.' });
@@ -246,17 +267,78 @@ export const register = async (req: Request, res: Response) => {
       relations: { role: true },
     });
 
-    const token = jwt.sign(
-      { id: savedUser.id, email: savedUser.email, role: userWithRole?.role.name },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
-    );
+    const roleName = userWithRole?.role.name || 'user';
+    const { token, refreshToken } = generateTokens({
+      id: savedUser.id,
+      email: savedUser.email,
+      role: roleName,
+    });
 
     return res.status(201).json({
       success: true,
-      data: { token, user: { id: savedUser.id, name: savedUser.name, email: savedUser.email, role: userWithRole?.role.name } },
+      data: {
+        token,
+        refreshToken,
+        user: { id: savedUser.id, name: savedUser.name, email: savedUser.email, role: roleName },
+      },
     });
   } catch (error) {
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+// ─── Refresh Token ────────────────────────────────────────────────────────────
+export const refreshToken = async (req: Request, res: Response) => {
+  try {
+    const rawToken = req.body?.refreshToken;
+    if (!rawToken || typeof rawToken !== 'string') {
+      return res.status(400).json({ success: false, message: 'Refresh token is required.' });
+    }
+
+    let payload: { id: string; email: string; role: string; type?: string };
+    try {
+      payload = jwt.verify(rawToken, JWT_REFRESH_SECRET) as { id: string; email: string; role: string; type?: string };
+    } catch {
+      return res.status(401).json({ success: false, message: 'Invalid or expired refresh token.' });
+    }
+
+    if (payload.type !== 'refresh' || !payload.id) {
+      return res.status(401).json({ success: false, message: 'Invalid refresh token.' });
+    }
+
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({
+      where: { id: payload.id },
+      relations: { role: true },
+    });
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({ success: false, message: 'User not found or account is deactivated.' });
+    }
+
+    const roleName = user.role?.name || 'user';
+    const tokens = generateTokens({
+      id: user.id,
+      email: user.email,
+      role: roleName,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Token refreshed successfully.',
+      data: {
+        token: tokens.token,
+        refreshToken: tokens.refreshToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: roleName,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };

@@ -4,6 +4,7 @@ import { PageView } from '../entities/PageView.js';
 import { PropertyView } from '../entities/PropertyView.js';
 import { ClickEvent } from '../entities/ClickEvent.js';
 import { SiteSetting } from '../entities/SiteSetting.js';
+import { checkAndSendSavedSearchAlerts } from './savedSearchAlertService.js';
 
 /**
  * Scheduled Tasks Service
@@ -11,6 +12,7 @@ import { SiteSetting } from '../entities/SiteSetting.js';
  */
 
 let analyticsCleanupTask: ReturnType<typeof cron.schedule> | null = null;
+let savedSearchAlertsTask: ReturnType<typeof cron.schedule> | null = null;
 
 /**
  * Analytics Data Cleanup Job
@@ -85,6 +87,29 @@ export const startAnalyticsCleanupJob = () => {
 };
 
 /**
+ * Saved Search Alerts Job
+ * Runs daily at 8:00 AM UTC to check for newly listed properties matching saved searches
+ */
+export const startSavedSearchAlertsJob = () => {
+  if (savedSearchAlertsTask) {
+    savedSearchAlertsTask.stop();
+  }
+
+  savedSearchAlertsTask = cron.schedule('0 8 * * *', async () => {
+    console.log('[Scheduled Task] Starting saved search alerts job...');
+    try {
+      await checkAndSendSavedSearchAlerts();
+    } catch (error) {
+      console.error('[Scheduled Task] Saved search alerts job failed:', error);
+    }
+  }, {
+    timezone: 'UTC',
+  });
+
+  console.log('[Scheduled Task] Saved search alerts job scheduled to run daily at 8:00 AM UTC');
+};
+
+/**
  * Stop all scheduled tasks
  */
 export const stopAllScheduledTasks = () => {
@@ -92,6 +117,11 @@ export const stopAllScheduledTasks = () => {
     analyticsCleanupTask.stop();
     analyticsCleanupTask = null;
     console.log('[Scheduled Task] Analytics cleanup job stopped');
+  }
+  if (savedSearchAlertsTask) {
+    savedSearchAlertsTask.stop();
+    savedSearchAlertsTask = null;
+    console.log('[Scheduled Task] Saved search alerts job stopped');
   }
 };
 
@@ -106,7 +136,10 @@ export const initializeScheduledTasks = () => {
   if (enableScheduledTasks) {
     console.log('[Scheduled Task] Initializing scheduled tasks...');
     startAnalyticsCleanupJob();
+    startSavedSearchAlertsJob();
   } else {
     console.log('[Scheduled Task] Scheduled tasks disabled (set ENABLE_SCHEDULED_TASKS=true to enable)');
   }
 };
+
+export const triggerSavedSearchAlerts = checkAndSendSavedSearchAlerts;

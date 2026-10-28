@@ -67,6 +67,9 @@ export class PropertySearch {
   @Column('text', { array: true, default: () => "'{}'" })
   features: string[];
 
+  @Column('timestamp', { name: 'last_alert_sent_at', nullable: true })
+  lastAlertSentAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

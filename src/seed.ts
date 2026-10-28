@@ -188,6 +188,10 @@ async function seed() {
       showServicesSection: true,
       showFeaturedSection: true,
       defaultCurrency: 'USD',
+      facebookUrl: 'https://www.facebook.com',
+      instagramUrl: 'https://www.instagram.com',
+      xUrl: 'https://x.com/GlobalOncg25',
+      linkedinUrl: 'https://www.linkedin.com/company/ingata-technologies-ltd/',
     });
     await siteSettingRepo.save(settings);
     console.log('  Created site settings');
