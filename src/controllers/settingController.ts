@@ -52,7 +52,11 @@ export const ensureSiteSettingsSchema = async () => {
         "search_rate_limit_per_minute" integer DEFAULT 30,
         "global_rate_limit" integer DEFAULT 100,
         "csrf_protection_enabled" boolean DEFAULT true,
-        "cross_tab_sync_enabled" boolean DEFAULT true
+        "cross_tab_sync_enabled" boolean DEFAULT true,
+        "require_uppercase" boolean DEFAULT true,
+        "require_lowercase" boolean DEFAULT true,
+        "require_numbers" boolean DEFAULT true,
+        "require_special_chars" boolean DEFAULT true
       );
 
       ALTER TABLE "site_settings"
@@ -95,7 +99,11 @@ export const ensureSiteSettingsSchema = async () => {
       ADD COLUMN IF NOT EXISTS "search_rate_limit_per_minute" integer DEFAULT 30,
       ADD COLUMN IF NOT EXISTS "global_rate_limit" integer DEFAULT 100,
       ADD COLUMN IF NOT EXISTS "csrf_protection_enabled" boolean DEFAULT true,
-      ADD COLUMN IF NOT EXISTS "cross_tab_sync_enabled" boolean DEFAULT true;
+      ADD COLUMN IF NOT EXISTS "cross_tab_sync_enabled" boolean DEFAULT true,
+      ADD COLUMN IF NOT EXISTS "require_uppercase" boolean DEFAULT true,
+      ADD COLUMN IF NOT EXISTS "require_lowercase" boolean DEFAULT true,
+      ADD COLUMN IF NOT EXISTS "require_numbers" boolean DEFAULT true,
+      ADD COLUMN IF NOT EXISTS "require_special_chars" boolean DEFAULT true;
     `);
     schemaEnsured = true;
   } catch (error) {
@@ -135,6 +143,10 @@ export const getSettings = async (_req: Request, res: Response, next: (error: un
         globalRateLimit: 100,
         csrfProtectionEnabled: true,
         crossTabSyncEnabled: true,
+        requireUppercase: true,
+        requireLowercase: true,
+        requireNumbers: true,
+        requireSpecialChars: true,
       });
       settings = await settingRepo.save(settings);
     }
@@ -160,6 +172,7 @@ export const updateSettings = async (req: Request, res: Response, next: (error: 
       maxPasswordLength, maxAuthAttempts, authRateLimitWindowMinutes,
       contactRateLimitPerHour, searchRateLimitPerMinute, globalRateLimit,
       csrfProtectionEnabled, crossTabSyncEnabled,
+      requireUppercase, requireLowercase, requireNumbers, requireSpecialChars,
     } = req.body;
 
     const parseNum = (v: unknown): number | undefined => {
@@ -194,6 +207,10 @@ export const updateSettings = async (req: Request, res: Response, next: (error: 
       globalRateLimit: parseNum(globalRateLimit),
       csrfProtectionEnabled: parseBool(csrfProtectionEnabled),
       crossTabSyncEnabled: parseBool(crossTabSyncEnabled),
+      requireUppercase: parseBool(requireUppercase),
+      requireLowercase: parseBool(requireLowercase),
+      requireNumbers: parseBool(requireNumbers),
+      requireSpecialChars: parseBool(requireSpecialChars),
     };
 
     const updatedValues = Object.fromEntries(

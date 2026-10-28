@@ -137,4 +137,16 @@ export class SiteSetting {
   @Column('boolean', { name: 'cross_tab_sync_enabled', default: true })
   crossTabSyncEnabled: boolean;
 
+  @Column('boolean', { name: 'require_uppercase', default: true })
+  requireUppercase: boolean;
+
+  @Column('boolean', { name: 'require_lowercase', default: true })
+  requireLowercase: boolean;
+
+  @Column('boolean', { name: 'require_numbers', default: true })
+  requireNumbers: boolean;
+
+  @Column('boolean', { name: 'require_special_chars', default: true })
+  requireSpecialChars: boolean;
+
 }

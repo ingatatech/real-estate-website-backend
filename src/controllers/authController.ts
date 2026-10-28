@@ -6,6 +6,7 @@ import { AppDataSource } from '../lib/typeorm.js';
 import { User } from '../entities/User.js';
 import { Role } from '../entities/Role.js';
 import { isPasswordResetEmailConfigured, sendPasswordResetEmail } from '../lib/passwordResetEmail.js';
+import { getPasswordPolicy, validatePasswordComplexity } from '../utils/passwordValidator.js';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '5m';
@@ -175,8 +176,10 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (!/^[a-f0-9]{64}$/i.test(token)) {
       return res.status(400).json({ success: false, message: 'This password reset link is invalid or expired.' });
     }
-    if (password.length < 8 || password.length > 128) {
-      return res.status(400).json({ success: false, message: 'Password must be between 8 and 128 characters.' });
+    const policy = await getPasswordPolicy();
+    const passwordValidation = validatePasswordComplexity(password, policy);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ success: false, message: passwordValidation.errors.join(' ') });
     }
 
     const userRepo = AppDataSource.getRepository(User);
@@ -206,6 +209,12 @@ export const register = async (req: Request, res: Response) => {
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
+    }
+
+    const passwordPolicy = await getPasswordPolicy();
+    const passwordValidation = validatePasswordComplexity(String(password), passwordPolicy);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ success: false, message: passwordValidation.errors.join(' ') });
     }
 
     const userRepo = AppDataSource.getRepository(User);

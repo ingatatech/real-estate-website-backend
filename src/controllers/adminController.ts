@@ -9,6 +9,7 @@ import { Inquiry } from '../entities/Inquiry.js';
 import { ViewingRequest } from '../entities/ViewingRequest.js';
 import { ValuationRequest } from '../entities/ValuationRequest.js';
 import { Role } from '../entities/Role.js';
+import { getPasswordPolicy, validatePasswordComplexity } from '../utils/passwordValidator.js';
 
 const normalizedRoleName = (name: string) => name.trim().toLowerCase();
 
@@ -231,8 +232,10 @@ export const createUser = async (req: Request, res: Response) => {
   if (!normalizedName || !normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
     return res.status(400).json({ success: false, message: 'A name and valid email address are required.' });
   }
-  if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
-    return res.status(400).json({ success: false, message: 'Password must be between 8 and 128 characters.' });
+  const passwordPolicy = await getPasswordPolicy();
+  const passwordValidation = validatePasswordComplexity(password, passwordPolicy);
+  if (!passwordValidation.isValid) {
+    return res.status(400).json({ success: false, message: passwordValidation.errors.join(' ') });
   }
   if (!Number.isInteger(parsedRoleId) || parsedRoleId < 1) {
     return res.status(400).json({ success: false, message: 'Select a valid role.' });
@@ -304,8 +307,12 @@ export const updateUser = async (req: Request, res: Response) => {
   if (name !== undefined && (typeof name !== 'string' || !name.trim())) {
     return res.status(400).json({ success: false, message: 'Name cannot be empty.' });
   }
-  if (password !== undefined && (typeof password !== 'string' || password.length < 8 || password.length > 128)) {
-    return res.status(400).json({ success: false, message: 'Password must be between 8 and 128 characters.' });
+  if (password !== undefined && password !== '') {
+    const passwordPolicy = await getPasswordPolicy();
+    const passwordValidation = validatePasswordComplexity(password, passwordPolicy);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ success: false, message: passwordValidation.errors.join(' ') });
+    }
   }
   if (isActive !== undefined && typeof isActive !== 'boolean') {
     return res.status(400).json({ success: false, message: 'Active status must be true or false.' });
