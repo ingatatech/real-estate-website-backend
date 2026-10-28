@@ -64,6 +64,21 @@ export class User {
   @Column('timestamp', { name: 'password_reset_expires_at', nullable: true })
   passwordResetExpiresAt: Date | null;
 
+  @Column('boolean', { name: 'is_email_verified', default: false })
+  isEmailVerified: boolean;
+
+  @Column('text', { name: 'email_verification_token_hash', nullable: true })
+  emailVerificationTokenHash: string | null;
+
+  @Column('timestamp', { name: 'email_verification_expires_at', nullable: true })
+  emailVerificationExpiresAt: Date | null;
+
+  @Column('integer', { name: 'failed_login_attempts', default: 0 })
+  failedLoginAttempts: number;
+
+  @Column('timestamp', { name: 'locked_until', nullable: true })
+  lockedUntil: Date | null;
+
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'role_id' })
   role: Role;
