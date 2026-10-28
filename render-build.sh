@@ -1,20 +1,13 @@
 #!/bin/bash
+set -e
 
-# Render build script for backend
-# This script runs migrations during the build process
+echo "Installing dependencies..."
+npm install --include=dev
 
-echo "Starting build process..."
+echo "Running database migrations..."
+NODE_ENV=production npx tsx src/scripts/runMigrations.ts
 
-# Install dependencies
-npm install
-
-# Build TypeScript
+echo "Building TypeScript..."
 npm run build
 
-# Run database migrations (only in production)
-if [ "$NODE_ENV" = "production" ]; then
-  echo "Running database migrations..."
-  npm run migration:run
-fi
-
-echo "Build completed successfully!"
+echo "Build complete!"

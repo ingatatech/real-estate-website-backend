@@ -3,7 +3,7 @@ services:
     name: ingata-backend
     runtime: node
     plan: free
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -17,6 +17,8 @@ services:
       - key: DATABASE_URL_UNPOOLED
         sync: false
       - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: FRONTEND_URL
         value: https://ingata-real-estate.vercel.app/
