@@ -72,7 +72,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Known Issues
 - Backend tests broken due to ESM configuration issue (Jest not handling ESM properly)
-- Swagger dependencies installed but not used
 
 ---
 

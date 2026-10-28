@@ -139,34 +139,19 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 ---
 
-#### 4. Implement API Documentation
-**Status:** 📋 Planned
-**Effort:** 10-15 hours
-**Description:** Add Swagger/OpenAPI documentation or remove unused dependencies
-
-**Tasks:**
-- Option A: Implement Swagger with swagger-jsdoc
-- Option B: Remove unused Swagger dependencies
-- Document all endpoints
-- Add examples
-- Set up Swagger UI
-
-**Impact:** Better API documentation or cleaner dependencies
-
----
-
 ### Low Priority (Future)
 
-#### 5. Remove Unused Dependencies
-**Status:** 📋 Planned
-**Effort:** 0.5 hours
-**Description:** Remove Swagger dependencies if not implementing API docs
+#### 4. ~~Remove Unused Dependencies~~ ✅ Complete
+**Status:** ✅ Complete
+**Effort:** Completed
+**Description:** Removed unused Swagger dependencies
 
-**Tasks:**
-- Remove swagger-jsdoc from package.json
-- Remove swagger-ui-express from package.json
-- Run npm install
-- Test application
+**Completed Tasks:**
+- ✅ Removed swagger-jsdoc from package.json
+- ✅ Removed swagger-ui-express from package.json
+- ✅ Removed @types/swagger-ui-express from package.json
+- ✅ Ran npm install
+- ✅ Tested application
 
 **Impact:** Cleaner dependencies, smaller bundle size
 
