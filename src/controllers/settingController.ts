@@ -21,6 +21,18 @@ export const getSettings = async (_req: Request, res: Response, next: (error: un
         instagramUrl: 'https://instagram.com',
         linkedinUrl: 'https://linkedin.com',
         defaultCurrency: 'RWF',
+        analyticsRetentionDays: 365,
+        sessionTimeoutMinutes: 5,
+        sessionWarningMinutes: 3,
+        minPasswordLength: 8,
+        maxPasswordLength: 128,
+        maxAuthAttempts: 5,
+        authRateLimitWindowMinutes: 15,
+        contactRateLimitPerHour: 3,
+        searchRateLimitPerMinute: 30,
+        globalRateLimit: 100,
+        csrfProtectionEnabled: true,
+        crossTabSyncEnabled: true,
       });
       settings = await settingRepo.save(settings);
     }
@@ -40,6 +52,10 @@ export const updateSettings = async (req: Request, res: Response, next: (error: 
       aboutDescription, aboutCtaText, aboutCtaLink, servicesTitle,
       servicesDescription, featuredSectionTitle, showAboutSection,
       showFeaturedSection, showServicesSection, analyticsRetentionDays,
+      sessionTimeoutMinutes, sessionWarningMinutes, minPasswordLength,
+      maxPasswordLength, maxAuthAttempts, authRateLimitWindowMinutes,
+      contactRateLimitPerHour, searchRateLimitPerMinute, globalRateLimit,
+      csrfProtectionEnabled, crossTabSyncEnabled,
     } = req.body;
     const settingValues = {
       siteName, logoUrl, faviconUrl, email, phone, whatsapp, address,
@@ -48,6 +64,10 @@ export const updateSettings = async (req: Request, res: Response, next: (error: 
       aboutDescription, aboutCtaText, aboutCtaLink, servicesTitle,
       servicesDescription, featuredSectionTitle, showAboutSection,
       showFeaturedSection, showServicesSection, analyticsRetentionDays,
+      sessionTimeoutMinutes, sessionWarningMinutes, minPasswordLength,
+      maxPasswordLength, maxAuthAttempts, authRateLimitWindowMinutes,
+      contactRateLimitPerHour, searchRateLimitPerMinute, globalRateLimit,
+      csrfProtectionEnabled, crossTabSyncEnabled,
     };
     const updatedValues = Object.fromEntries(
       Object.entries(settingValues).filter(([, value]) => value !== undefined),

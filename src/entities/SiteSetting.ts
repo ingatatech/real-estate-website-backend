@@ -104,4 +104,37 @@ export class SiteSetting {
   @Column('integer', { name: 'analytics_retention_days', default: 365 })
   analyticsRetentionDays: number;
 
+  @Column('integer', { name: 'session_timeout_minutes', default: 5 })
+  sessionTimeoutMinutes: number;
+
+  @Column('integer', { name: 'session_warning_minutes', default: 3 })
+  sessionWarningMinutes: number;
+
+  @Column('integer', { name: 'min_password_length', default: 8 })
+  minPasswordLength: number;
+
+  @Column('integer', { name: 'max_password_length', default: 128 })
+  maxPasswordLength: number;
+
+  @Column('integer', { name: 'max_auth_attempts', default: 5 })
+  maxAuthAttempts: number;
+
+  @Column('integer', { name: 'auth_rate_limit_window_minutes', default: 15 })
+  authRateLimitWindowMinutes: number;
+
+  @Column('integer', { name: 'contact_rate_limit_per_hour', default: 3 })
+  contactRateLimitPerHour: number;
+
+  @Column('integer', { name: 'search_rate_limit_per_minute', default: 30 })
+  searchRateLimitPerMinute: number;
+
+  @Column('integer', { name: 'global_rate_limit', default: 100 })
+  globalRateLimit: number;
+
+  @Column('boolean', { name: 'csrf_protection_enabled', default: true })
+  csrfProtectionEnabled: boolean;
+
+  @Column('boolean', { name: 'cross_tab_sync_enabled', default: true })
+  crossTabSyncEnabled: boolean;
+
 }
