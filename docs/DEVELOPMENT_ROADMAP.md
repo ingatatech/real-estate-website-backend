@@ -328,6 +328,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Implement favorites in App Router pages (done)
 - ✅ Implement enhanced property gallery with zoom (done)
 - ✅ Implement saved search email alerts (done)
+- ✅ Remove unused dependencies (done)
 - 🔄 Fix backend test configuration
 - 📋 Add integration tests
 
@@ -336,6 +337,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Refresh token implementation
 - ✅ Security features implemented
 - ✅ User experience features implemented
+- ✅ Cleaner dependencies
 - Backend tests passing
 - 50% API coverage
 
