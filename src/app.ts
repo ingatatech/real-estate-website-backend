@@ -11,6 +11,10 @@ initSentry();
 
 const app = express();
 
+// Trust proxy for Render's proxy chain (1 hop)
+// This allows express-rate-limit to correctly identify client IPs behind Render's proxy
+app.set('trust proxy', 1);
+
 // Configure CORS
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
