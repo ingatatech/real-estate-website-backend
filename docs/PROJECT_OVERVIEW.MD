@@ -142,6 +142,15 @@ realestateweb/
 || Frontend App Router Migration | ✅ Complete | All 91+ pages migrated to app/ directory |
 || Legacy Page Cleanup | ✅ Complete | No legacy pages remain |
 || Backend Testing | ⚠️ Broken | 3 test files exist but ESM configuration prevents execution |
+||| Refresh Token Mechanism | ✅ Complete | JWT refresh token rotation for extended sessions |
+||| Password Complexity Requirements | ✅ Complete | Configurable password rules (uppercase, lowercase, numbers, special chars) |
+||| Account Lockout | ✅ Complete | Configurable account lockout after failed login attempts |
+||| Email Verification | ✅ Complete | Email verification for new accounts |
+||| Security Settings | ✅ Complete | Admin-configurable security settings in dashboard |
+||| Favorites in App Router | ✅ Complete | Favorites functionality on all App Router pages |
+||| Enhanced Property Gallery | ✅ Complete | Image gallery with zoom functionality |
+||| Saved Search Alerts | ✅ Complete | Email alerts for new property matches on saved searches |
+||| Social Media Links | ✅ Complete | Updated with actual brand URLs (X, LinkedIn, Facebook, Instagram) |
 
 ### Unimplemented Features ❌
 

@@ -1,6 +1,6 @@
 # Development Roadmap
 
-**Last Updated:** October 27, 2026
+**Last Updated:** October 28, 2026
 
 ---
 
@@ -15,7 +15,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 ### Version 1.0.0 (October 2026)
 
 **Core Platform:**
-- ✅ User authentication (JWT)
+- ✅ User authentication (JWT with refresh tokens)
 - ✅ Multi-role system (5 roles)
 - ✅ Property listing management
 - ✅ Property search with filters
@@ -31,9 +31,9 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Valuation requests
 - ✅ Listing requests
 - ✅ Contact forms
-- ✅ Favorites
-- ✅ Property searches
-- ✅ Property comparison
+- ✅ Favorites in App Router pages
+- ✅ Property searches with email alerts
+- ✅ Property comparison UI
 - ✅ Mortgage calculator
 - ✅ Rental yield calculator
 
@@ -54,13 +54,17 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ Automated data cleanup
 
 **Security:**
-- ✅ JWT authentication
+- ✅ JWT authentication with refresh token rotation
 - ✅ Password hashing (bcrypt)
 - ✅ Rate limiting
 - ✅ CORS configuration
 - ✅ Security headers (Helmet)
 - ✅ Role-based authorization
 - ✅ Password reset (email)
+- ✅ Standard password complexity requirements
+- ✅ Account lockout mechanism
+- ✅ Email verification
+- ✅ Configurable security settings
 
 **Infrastructure:**
 - ✅ Backend deployment (Render)
@@ -79,6 +83,7 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - ✅ SEO optimization
 - ✅ Cookie consent management
 - ✅ Inactivity logout
+- ✅ Enhanced property gallery with zoom
 
 ---
 
@@ -87,8 +92,8 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 ### High Priority (Immediate)
 
 #### 1. Fix Backend Test Configuration
-**Status:** ⚠️ Broken  
-**Effort:** 1-2 hours  
+**Status:** ⚠️ Broken
+**Effort:** 1-2 hours
 **Description:** Configure Jest to handle ESM modules and enable backend testing
 
 **Tasks:**
@@ -102,8 +107,8 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 ---
 
 #### 2. Legacy Page Migration (Completed)
-**Status:** ✅ Complete  
-**Effort:** Completed  
+**Status:** ✅ Complete
+**Effort:** Completed
 **Description:** Migrate 92 legacy pages to Next.js App Router
 
 **Completed Tasks:**
@@ -118,26 +123,9 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 ### Medium Priority (Near Term)
 
-#### 3. Implement Refresh Token Mechanism
-**Status:** 📋 Planned  
-**Effort:** 8-12 hours  
-**Description:** Add refresh token support to reduce frequent re-authentication
-
-**Tasks:**
-- Design refresh token flow
-- Add refresh token endpoint
-- Store refresh token in HTTP-only cookie
-- Update frontend to use refresh token
-- Extend access token duration
-- Test refresh flow
-
-**Impact:** Improve user experience, reduce login frequency
-
----
-
-#### 4. Add Automated Email Testing
-**Status:** 📋 Planned  
-**Effort:** 4-6 hours  
+#### 3. Add Automated Email Testing
+**Status:** 📋 Planned
+**Effort:** 4-6 hours
 **Description:** Test email functionality in CI/CD pipeline
 
 **Tasks:**
@@ -151,9 +139,9 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 ---
 
-#### 5. Implement API Documentation
-**Status:** 📋 Planned  
-**Effort:** 10-15 hours  
+#### 4. Implement API Documentation
+**Status:** 📋 Planned
+**Effort:** 10-15 hours
 **Description:** Add Swagger/OpenAPI documentation or remove unused dependencies
 
 **Tasks:**
@@ -169,9 +157,9 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 ### Low Priority (Future)
 
-#### 6. Remove Unused Dependencies
-**Status:** 📋 Planned  
-**Effort:** 0.5 hours  
+#### 5. Remove Unused Dependencies
+**Status:** 📋 Planned
+**Effort:** 0.5 hours
 **Description:** Remove Swagger dependencies if not implementing API docs
 
 **Tasks:**
@@ -181,70 +169,6 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - Test application
 
 **Impact:** Cleaner dependencies, smaller bundle size
-
----
-
-#### 7. Update Social Media Links
-**Status:** 📋 Planned  
-**Effort:** 0.5 hours  
-**Description:** Replace placeholder social media URLs with actual brand URLs
-
-**Tasks:**
-- Update site settings with actual URLs
-- Or remove social media section if not used
-- Test links
-
-**Impact:** Accurate social media presence
-
----
-
-#### 8. Add Password Complexity Requirements
-**Status:** 📋 Planned  
-**Effort:** 2-3 hours  
-**Description:** Enforce stronger password requirements
-
-**Tasks:**
-- Add password complexity validation
-- Require uppercase, lowercase, numbers, special chars
-- Add password strength meter
-- Update validation messages
-- Test password flow
-
-**Impact:** Improved security
-
----
-
-#### 9. Implement Account Lockout
-**Status:** 📋 Planned  
-**Effort:** 4-6 hours  
-**Description:** Lock accounts after failed login attempts
-
-**Tasks:**
-- Track failed login attempts
-- Lock account after N attempts
-- Implement lockout duration
-- Add unlock mechanism
-- Notify user of lockout
-- Test lockout flow
-
-**Impact:** Improved security, prevent brute force
-
----
-
-#### 10. Add Email Verification
-**Status:** 📋 Planned  
-**Effort:** 6-8 hours  
-**Description:** Require email verification for new accounts
-
-**Tasks:**
-- Add email verification token to users table
-- Send verification email on registration
-- Add verification endpoint
-- Block unverified users from certain features
-- Add resend verification option
-- Test verification flow
-
-**Impact:** Improved security, verified email addresses
 
 ---
 
@@ -263,12 +187,6 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 - **Audit Logging:** Log all user actions for security audit
 - **IP-based Rate Limiting:** More sophisticated rate limiting per user
 - **Request Size Limiting:** Prevent large payload attacks
-
-#### User Experience
-- **Property Comparison UI:** Integrate comparison hook with UI component
-- **Favorites in New Pages:** Add favorites to App Router pages
-- **Property Gallery:** Enhanced image gallery with zoom
-- **Save Search Alerts:** Email alerts for saved searches
 
 #### Content Management
 - **Rich Text Editor:** Better editor for articles and pages
@@ -340,8 +258,6 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 ### High Priority
 
 1. **Backend Test Configuration** - Fix ESM issues
-2. ~~**Legacy Page Migration** - Complete App Router migration~~ ✅ COMPLETED
-3. **No Refresh Tokens** - Implement refresh token mechanism
 
 ### Medium Priority
 
@@ -412,15 +328,24 @@ This document outlines the development roadmap for the Ingata Real Estate platfo
 
 **Goals:**
 - ✅ Complete core platform (done)
+- ✅ Complete legacy page migration (done)
+- ✅ Implement refresh tokens (done)
+- ✅ Implement password complexity requirements (done)
+- ✅ Implement account lockout (done)
+- ✅ Implement email verification (done)
+- ✅ Implement property comparison UI (done)
+- ✅ Implement favorites in App Router pages (done)
+- ✅ Implement enhanced property gallery with zoom (done)
+- ✅ Implement saved search email alerts (done)
 - 🔄 Fix backend test configuration
-- 🔄 Complete 50% of legacy page migration
-- 📋 Implement refresh tokens
 - 📋 Add integration tests
 
 **Success Metrics:**
+- ✅ Legacy pages migrated (91+ pages)
+- ✅ Refresh token implementation
+- ✅ Security features implemented
+- ✅ User experience features implemented
 - Backend tests passing
-- 46 legacy pages migrated
-- Refresh token implementation
 - 50% API coverage
 
 ### Q1 2027 (January - March)
