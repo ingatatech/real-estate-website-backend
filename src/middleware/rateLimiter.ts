@@ -11,6 +11,7 @@ export const apiRateLimiter = rateLimit({
 	},
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+	validate: { xForwardedForHeader: false },
 });
 
 // Stricter rate limiter for authentication endpoints
@@ -23,6 +24,7 @@ export const authRateLimiter = rateLimit({
 	},
 	standardHeaders: true,
 	legacyHeaders: false,
+	validate: { xForwardedForHeader: false },
 });
 
 // Rate limiter for contact/inquiry forms (prevent spam)

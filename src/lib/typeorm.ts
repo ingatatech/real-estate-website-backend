@@ -42,6 +42,9 @@ const databaseUrl = getDatabaseUrl();
 export const AppDataSource = new DataSource({
   type: 'postgres',
   url: databaseUrl,
+  ssl: databaseUrl.includes('render.com') || databaseUrl.includes('neon.tech') || process.env.NODE_ENV === 'production'
+    ? { rejectUnauthorized: false }
+    : undefined,
   synchronize: databaseConfig.synchronize,
   logging: databaseConfig.logging,
   entities: [

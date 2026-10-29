@@ -46,6 +46,25 @@ const loadLockoutSettings = async (): Promise<{ maxAttempts: number; lockWindowM
   }
 };
 
+let userSchemaEnsured = false;
+export const ensureUserSchema = async () => {
+  if (userSchemaEnsured) return;
+  try {
+    await AppDataSource.query(`
+      ALTER TABLE "users" 
+      ADD COLUMN IF NOT EXISTS "is_email_verified" boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS "email_verification_token_hash" text,
+      ADD COLUMN IF NOT EXISTS "email_verification_expires_at" timestamp,
+      ADD COLUMN IF NOT EXISTS "failed_login_attempts" integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "locked_until" timestamp;
+    `);
+    userSchemaEnsured = true;
+    console.log('User schema self-healed and verified');
+  } catch (err) {
+    console.warn('Auto-user-schema verification notice:', err);
+  }
+};
+
 // ─── Admin Login ────────────────────────────────────────────────────────────
 export const adminLogin = async (req: Request, res: Response) => {
   try {
@@ -55,11 +74,13 @@ export const adminLogin = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     const userRepo = AppDataSource.getRepository(User);
-    const user = await userRepo.findOne({
-      where: { email: String(email) },
-      relations: { role: true },
-    });
+    const user = await userRepo.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('LOWER(user.email) = :email', { email: normalizedEmail })
+      .getOne();
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
@@ -69,8 +90,9 @@ export const adminLogin = async (req: Request, res: Response) => {
       return res.status(403).json({ success: false, message: 'Account is deactivated. Contact support.' });
     }
 
+    const roleName = user.role?.name || (typeof user.role === 'string' ? user.role : '');
     // Require admin role
-    if (user.role.name.toLowerCase() !== 'admin') {
+    if (roleName.toLowerCase() !== 'admin') {
       return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
     }
 
@@ -107,7 +129,7 @@ export const adminLogin = async (req: Request, res: Response) => {
     const { token, refreshToken } = generateTokens({
       id: user.id,
       email: user.email,
-      role: user.role.name,
+      role: roleName,
     });
 
     return res.json({
@@ -120,7 +142,7 @@ export const adminLogin = async (req: Request, res: Response) => {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role.name,
+          role: roleName,
         },
       },
     });
@@ -139,11 +161,13 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     const userRepo = AppDataSource.getRepository(User);
-    const user = await userRepo.findOne({
-      where: { email: String(email) },
-      relations: { role: true },
-    });
+    const user = await userRepo.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('LOWER(user.email) = :email', { email: normalizedEmail })
+      .getOne();
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
@@ -180,10 +204,12 @@ export const login = async (req: Request, res: Response) => {
     user.lastLoginAt = new Date();
     await userRepo.save(user);
 
+    const roleName = user.role?.name || (typeof user.role === 'string' ? user.role : 'user');
+
     const { token, refreshToken } = generateTokens({
       id: user.id,
       email: user.email,
-      role: user.role.name,
+      role: roleName,
     });
 
     return res.json({
@@ -191,10 +217,11 @@ export const login = async (req: Request, res: Response) => {
       data: {
         token,
         refreshToken,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role.name },
+        user: { id: user.id, name: user.name, email: user.email, role: roleName },
       },
     });
   } catch (error) {
+    console.error('Login error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };

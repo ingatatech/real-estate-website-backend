@@ -4,6 +4,7 @@ import { env } from './config/env.js';
 import AppDataSource from './lib/typeorm.js';
 import { initializeScheduledTasks } from './services/scheduledTasks.js';
 import { ensureSiteSettingsSchema } from './controllers/settingController.js';
+import { ensureUserSchema } from './controllers/authController.js';
 
 AppDataSource.initialize()
   .then(async () => {
@@ -13,6 +14,21 @@ AppDataSource.initialize()
       console.log('Site settings schema self-healed and verified');
     } catch (schemaError) {
       console.warn('Auto-schema verification notice:', schemaError);
+    }
+    try {
+      await ensureUserSchema();
+    } catch (userSchemaError) {
+      console.warn('Auto-user-schema verification notice:', userSchemaError);
+    }
+    try {
+      const pendingMigrations = await AppDataSource.showMigrations();
+      if (pendingMigrations) {
+        console.log('Applying pending migrations on startup...');
+        await AppDataSource.runMigrations();
+        console.log('Migrations applied successfully on startup');
+      }
+    } catch (migError) {
+      console.warn('Startup migration notice:', migError);
     }
     // Initialize scheduled tasks (analytics cleanup, etc.)
     initializeScheduledTasks();
