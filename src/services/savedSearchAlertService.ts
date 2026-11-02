@@ -87,7 +87,7 @@ export const sendSavedSearchAlertEmail = async (
   const propertiesHtml = properties
     .slice(0, 6)
     .map((p) => {
-      const propertyUrl = `${frontendUrl}/properties/${p.slug || p.id}`;
+      const propertyUrl = `${frontendUrl}/properties/${encodeURIComponent(p.id)}`;
       const specs = [
         p.bedrooms ? `${p.bedrooms} Beds` : null,
         p.bathrooms ? `${p.bathrooms} Baths` : null,
@@ -181,7 +181,7 @@ export const sendSavedSearchAlertEmail = async (
   `;
 
   const text = `Ingata Real Estate - New Properties Alert\n\nWe found ${propertyCount} new properties matching your search criteria.\n\n` +
-    properties.slice(0, 5).map((p) => `- ${p.title} (${formatPrice(p.price, p.currency)}): ${frontendUrl}/properties/${p.slug || p.id}`).join('\n') +
+    properties.slice(0, 5).map((p) => `- ${p.title} (${formatPrice(p.price, p.currency)}): ${frontendUrl}/properties/${encodeURIComponent(p.id)}`).join('\n') +
     `\n\nBrowse all properties: ${frontendUrl}/properties`;
 
   await transporter.sendMail({
