@@ -239,9 +239,17 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
       .where('LOWER(user.email) = :email', { email })
       .getOne();
-    if (!user || !user.isActive) {
+
+    // Only allow password reset for active users who have a recognised staff
+    // role. Public registrants (role "user") and property owners without portal
+    // access are silently rejected with the same generic response so that no
+    // information about whether an account exists is leaked to the caller.
+    const STAFF_ROLES = ['admin', 'agent', 'property_manager', 'content_editor'];
+    const roleName = user?.role?.name ?? '';
+    if (!user || !user.isActive || !STAFF_ROLES.includes(roleName)) {
       return res.json({ success: true, message: PASSWORD_RESET_RESPONSE });
     }
 
@@ -286,8 +294,21 @@ export const resetPassword = async (req: Request, res: Response) => {
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.findOne({
       where: { passwordResetTokenHash: hashResetToken(token) },
+      relations: { role: true },
     });
-    if (!user || !user.isActive || !user.passwordResetExpiresAt || user.passwordResetExpiresAt.getTime() <= Date.now()) {
+
+    // Reject if user doesn't exist, is inactive, token is expired, or the
+    // account doesn't have a staff role (defence-in-depth: mirrors the
+    // forgotPassword gate so orphaned tokens for non-staff accounts are dead).
+    const STAFF_ROLES = ['admin', 'agent', 'property_manager', 'content_editor'];
+    const resetRoleName = user?.role?.name ?? '';
+    if (
+      !user ||
+      !user.isActive ||
+      !STAFF_ROLES.includes(resetRoleName) ||
+      !user.passwordResetExpiresAt ||
+      user.passwordResetExpiresAt.getTime() <= Date.now()
+    ) {
       return res.status(400).json({ success: false, message: 'This password reset link is invalid or expired.' });
     }
 
