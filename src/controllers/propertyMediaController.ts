@@ -4,9 +4,11 @@ import { AppDataSource } from '../lib/typeorm.js';
 import { User } from '../entities/User.js';
 
 const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, '');
-const secretKey = process.env.SUPABASE_SECRET_KEY;
+// Prefer the service-role key for storage operations (bypasses RLS); fall back
+// to the legacy SUPABASE_SECRET_KEY if that is what has been configured.
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const storageApiKey = secretKey || serviceRoleKey;
+const secretKey = process.env.SUPABASE_SECRET_KEY;
+const storageApiKey = serviceRoleKey || secretKey;
 const propertyMediaBucket = process.env.SUPABASE_PROPERTY_MEDIA_BUCKET || 'property-media';
 const developmentMediaBucket = process.env.SUPABASE_DEVELOPMENT_MEDIA_BUCKET || 'development-media';
 
@@ -35,8 +37,10 @@ const uploadMedia = async (req: Request, res: Response, bucket: string, prefix: 
     const response = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${path}`, {
       method: 'POST',
       headers: {
-        ...(!secretKey && serviceRoleKey ? { Authorization: `Bearer ${serviceRoleKey}` } : {}),
+        // Supabase Storage requires BOTH apikey and Authorization headers.
+        // Using the same key for both is correct for service-role access.
         apikey: storageApiKey,
+        Authorization: `Bearer ${storageApiKey}`,
         'Content-Type': file.mimetype,
         'x-upsert': 'false',
       },
